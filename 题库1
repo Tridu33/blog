@@ -1,0 +1,421 @@
+1、永远不应该被序列化的敏感信息不包括：回答正确
+A、数字证书
+B、所有的类
+C、秘钥
+D、在序列化时引用敏感数据的类
+正确答案：B    提交答案：B
+2、以下程序执行输出结果是：
+public class Test {
+    public volatile int inc = 0;
+     
+    public void increase() {
+        inc++;
+    }
+    public static void main(String[] args) {
+        final Test test = new Test();
+        for(int i=0;i<10000;i++){
+            new Thread(){
+                public void run() {
+                    for(int j=0;j<10;j++)
+                        test.increase();
+                };
+            }.start();
+        }
+         
+        while(Thread.activeCount()>1)  //保证前面的线程都执行完
+            Thread.yield();
+        System.out.println(test.inc);
+    }
+}回答正确
+A、不确定，小于或等于100000
+B、 10
+C、 100000
+D、 0
+正确答案：A    提交答案：A
+3、关于锁对象的说法错误的是
+A、Boolean类型不适合作为锁使用
+B、在异常条件下，保证释放已持有的锁
+C、使用相同的方式请求和释放锁，避免死锁
+D、Integer类型不适合作为锁使用
+正确答案：D    提交答案：D
+4、以下哪个不属于ReDos攻击的防护手段回答正确
+A、对正则匹配的数据长度进行限制
+B、在编写正则时，尽量不要使用过于复杂的正则
+C、避免动态构建正则，当使用不可信数据构造正则时，要使用黑名单进行严格校验
+D、在编写正则时，尽量减少分组的使用
+正确答案：C    提交答案：C
+5、关于文件路径校验说法错误的是回答正确
+A、File.getAbsolutePath()返回文件的相对路径
+B、使用File.getCanonicalPath()方法，它能在所有的平台上对所有别名、快捷方式以及符号链接进行一致地解析
+C、获取文件路径时，必须使用getCanonicalPath()，禁止使用getAbsolutePath()
+D、文件路径校验前必须先进行标准化处理
+正确答案：A    提交答案：A
+6、TransformerFactory 设置下面哪个feature可使xslt在转换XML过程中避免被注入执行任意程序恶意代码的问题回答正确
+A、http://apache.org/xml/features/disallow-doctype-decl
+B、http://javax.xml.XMLConstants/feature/secure-processing
+C、http://xml.org/sax/features/external-parameter-entities
+D、http://xml.org/sax/features/external-general-entities
+正确答案：B    提交答案：B
+7、关于NullPointException异常下面说明错误的是？
+A、在判断字符串是有效时不可以根据try捕获异常的方式判断其不是有效字符串。
+B、对于调用开源三方件，三方件中抛出NullPointerException异常时，可以捕获NullPointerException，并对该异常进行处理。
+C、直接捕获异常，并对该异常进行处理，保证程序正常执行不会报错即可。
+D、非开源三方件的NullPointException异常需要对根因进行定位处理，不是只处理异常即可。
+正确答案：C    提交答案：C
+8、下面的说法错误的是回答正确
+A、不要使用已标注为@deprecated的方法
+B、对于返回数组或者容器的方法，应返回长度为0的数组或者容器，代替返回nul
+C、使用JDK自带的API或广泛使用的开源库，不要自己写类似的功能
+D、某些情况下我们希望指定某些枚举常量为某个固定值以代表特殊意义。返回该固定值的方法可以基于ordinal方法来实现
+正确答案：D    提交答案：D
+9、下面哪个地方不应该使用空格隔开
+A、任何关键字（例如if，for 或catch ）与该行后面的左括号用空格分开
+B、在声明的类型和变量之间
+C、任何二元或三元运算符的两边，包含联合类型中的＆符号以及 `::`（方法引用的两个冒号）
+D、在双斜杠（ // ）的开始一行注释的前面须留有空格，建议仅留有一个空格，不鼓励留有多个空格
+正确答案：C    提交答案：C
+10、被检查的异常和不受检查的异常有什么区别
+A、受检查的异常应该用try-catch块代码处理，或者在方法中用throws关键字让JRE了解程序可能抛出哪些异常。运行时异常在程序中不要求被处理或用throws语句告知。
+B、Exception是所有受检异常的基类，不是运行时异常的基类。
+C、NumberFormatException，NullPointerException属于受检异常，需要处理。
+D、错误（error）被JVM保留用于指示资源不足、约束失败或者其他程序无法继续执行的情况，日常编程中最好实现新的Error子类来说明当前错误的情况。
+正确答案：A    提交答案：A
+11、推荐的防御SQL注入的最佳方式是回答正确
+A、使用存储过程
+B、对外部输入进行转义
+C、限制外部输入的长度
+D、使用参数化查询
+正确答案：D    提交答案：D
+12、下面函数返回结果是：
+public int testException(){
+   int flag = -1;
+   try{
+ 
+   }catch(Exception e){
+      flag = 2;
+   }finlly{
+      return 0;
+   }
+ 
+   return flag;
+}回答正确
+A、都不是
+B、 -1
+C、 0
+D、 2
+正确答案：C    提交答案：C
+13、下面说法错误的是回答正确
+A、过多的使用锁可能会导致死锁
+B、调用Thread.stop()会造成一个线程非正常释放它所获得的所有锁，可能会暴露这些锁保护的对象，使这些对象处于一个不一致的状态中
+C、程序不能使用实例锁来保护静态共享数据，因为实例锁在两个或多个实例的情况下是无效的，导致并发时的线程同步失效
+D、直接调用Thread.run()方法，run()方法中的语句是由新创建线程来执行
+正确答案：D    提交答案：D
+14、如下此段代码运行输出是什么
+public class Swan {
+    public static void fly() {
+        System.out.println("swan can fly ...");
+    }
+    public void flyOther() {
+        System.out.println("swan can fly other...");
+    }
+ 
+    static class UglyDuck extends Swan{
+        public static void fly() {
+            System.out.println("ugly duck can't fly ...");
+        }
+        public void flyOther() {
+            System.out.println("ugly duck can't fly other...");
+        }
+    }
+
+    public static void main(String[] args) {
+        Swan uglyDuck = new UglyDuck();
+        uglyDuck.fly();// 1
+        uglyDuck.flyOther();// 2
+    }
+}回答错误
+A、swan can fly …
+swan can fly other…
+B、ugly duck can't fly …
+swan can fly other…
+C、ugly duck can't fly …
+ugly duck can't fly other…
+D、swan can fly ...
+ugly duck can't fly other…
+正确答案：D    
+15、使用SSLSocket代替Socket的原因？回答正确
+A、更简单
+B、减低效率
+C、效率更快
+D、更安全 
+正确答案：D    提交答案：D
+16、那个不是推荐的加密算法
+A、SHA1
+B、ECDSA
+C、AES
+D、RSA
+正确答案：A    提交答案：A
+17、父类中处理敏感关键信息的方法，以下哪种方式最合理回答正确
+A、使用protected修饰
+B、使用final修饰
+C、使用public修饰
+正确答案：B    提交答案：B
+18、下面说法正确的是:回答正确
+A、使用空格缩进,对齐就行, 没有空格个数要求
+B、使用空格进行缩进，每次缩进2个空格即可
+C、 代码缩进使用tab,空格都可以
+D、使用空格进行缩进，每次缩进4个空格
+正确答案：D    提交答案：D
+19、关于国际化的说法错误的是回答正确
+A、在所有的输入输出环节，指明正确的编码方式，进行正确的字符到字节，或字节到字符的转换
+B、String类的toUpperCase()和toLowerCase()方法、format()方法，如果不输入参数，则会按当前系统默认的编码模式转换，因此转换结果可能并非如你所预期
+C、如果输入源或输出目标直接支持，尽可能直接使用GBK进行输入输出
+D、Java源文件，资源文件，配置文件必须用UTF-8编码
+正确答案：C    提交答案：C
+20、以下代码中1和2处代码的输出分别是
+public class Email 
+ { 
+        public String address; 
+         
+        public Email(String address) 
+       { 
+                this.address = address; 
+        } 
+         
+        public int hashCode() 
+       { 
+                int result = address.hashCode(); 
+                return result; 
+        } 
+         
+        public static void main(String[] args) 
+      { 
+                HashSet<Email> set = new HashSet<Email>(); 
+                Email email = new Email("huawei.com"); 
+                set.add(email); 
+                email.address = "silong.com";
+                System.out.println(set.contains(email)); //1
+                set.remove(email);
+                System.out.println(set.size());  //2
+        } 
+}
+A、false,1
+B、true,1
+C、true,0
+D、false,0
+正确答案：A    提交答案：A
+21、下面的代码片段最终输出的结果是多少
+public class Increment {
+    public static void main(String[] args) {
+        int count = 0;
+        for (int i = 0; i < 100; i++) {
+            count = count++;
+        } 
+        System.out.println(count);
+    }
+}
+A、 100
+B、 0
+C、 1
+D、 10
+正确答案：B    提交答案：B
+22、业界威胁建模方法主要的类型不包括：回答错误
+A、以威胁为中心
+B、以攻击者为中心
+C、以资产为中心
+D、以软件为中心
+正确答案：A    提交答案：D
+23、保存口令等敏感数据应优先使用_______，使用结束后_______，可降低敏感数据泄露的风险(    )回答正确
+A、String，置为0
+B、char[]，清0
+C、String，等待垃圾收集器回收
+D、char[]，等待垃圾收集器回收
+正确答案：B    提交答案：B
+24、当方法遇到异常又不知如何处理时，下列哪种说法是正确的回答错误
+A、嵌套异常
+B、声明异常
+C、抛出异常
+D、捕获异常
+正确答案：B    提交答案：C
+25、下面关于变量的说法错误的是回答正确
+A、不能用浮点数作为循环变量
+B、浮点型数据判断相等不能直接使用==
+C、需要精确计算时建议使用long和double
+D、避免同一个局部变量在前后表达不同的含义
+正确答案：C    提交答案：C
+26、对于使用默认编码方式的第三方代码或者遗留代码， 可应用适配器模式，将返回的字符串转换成什么内码回答错误
+A、incode
+B、Unicode
+C、decode
+D、uncode
+正确答案：B    提交答案：C
+27、以下代码结果是
+class Dog {
+    public static void bark() {
+        System.out.println("woof");
+    }
+}
+class Basenji extends Dog {
+    public static void bark() {
+        System.out.println("miao");
+    }
+}
+public class Bark {
+    public static void main(String[] args) {
+        Dog woofer = new Dog();
+        Dog nipper = new Basenji();
+        woofer.bark();
+        nipper.bark();
+    }
+}回答错误
+A、输出2行miao
+B、输出miao
+C、输出woof
+miao
+D、输出2行woof
+正确答案：D    提交答案：B
+28、如下的代码片段说法错误的是
+public class SensitiveHash {
+    private Hashtable<Integer, String> ht = new Hashtable<Integer, String>();
+
+    public void removeEntry(Object key) {
+        ht.remove(key);
+    }
+}回答错误
+A、代码实例化一个Hashtable，并定义了一个removeEntry()方法删除其条目
+B、应该使用安全管理器检查来防止Hashtable实例中的条目被恶意删除
+C、由于该方法被声明为是public且non-final的，所以是安全的
+D、removeEntry()这个方法被认为是敏感的，因为哈希表中包含敏感信息
+正确答案：C    提交答案：B
+29、对于命令注入漏洞，命令将会以什么权限进行执行？回答错误
+A、低于Java应用程序的权限
+B、高于Java应用程序的权限
+C、与Java应用程序相同的权限
+D、命令注入时注入的权限
+正确答案：C    提交答案：D
+30、以下关于线程说法错误的是回答错误
+A、java doc文档需要重点描述业务功能，对线程安全性简单说明即可，不需要详细说明
+B、针对线程安全性，需要进行文档（javadoc）说明
+C、当一个类的实例或者静态方法被并发使用的时候，这个类的行为如何，是该类与其客户端程序建立的约定的重要组成部分
+D、如果一个类的文档中未描述其行为的并发性情况，使用者有可能做出错误假设，程序就可能缺少足够的同步，或者过度同步
+正确答案：A    提交答案：D
+31、方法头注释可以包含哪些内容？回答错误
+A、算法实现、可重入的要求
+B、功能说明、返回值
+C、用法、内存约定
+D、性能约束
+正确答案：ABCD    提交答案：D
+32、跨信任边界传递的不可信数据使用前必须进行校验，可以采用哪些校验方式？回答错误
+A、“白名单”方式净化
+B、“白名单”或者“正向”校验
+C、“黑名单”方式净化
+D、“黑名单”或者“负向”校验
+正确答案：ABCD    提交答案：D
+33、哪些信息是日志中不能保存的回答错误
+A、银行卡信息
+B、调试信息
+C、口令、密钥
+D、个人账户信息
+正确答案：ACD    提交答案：D
+34、preparedStatement和Statement的区别有哪些？回答错误
+A、任何情况下，Statement要比PreparedStatement的效率高
+B、在执行可变参数的一条SQL时，PreparedStatement要比Statement的效率高，因为DBMS预编译一条SQL当然会比多次编译一条SQL的效率高。安全性更好，有效防止SQL注入的问题。
+C、对于多次重复执行的语句，使用PreparedStatement效率会更高一点。
+D、PreparedStatement的安全性比Statement好
+正确答案：BCD    提交答案：D
+35、Java语言中，处理IO的方式都有哪几种？回答错误
+A、CIO
+B、 AIO
+C、NIO
+D、BIO
+正确答案：BCD    提交答案：D
+36、关于平台安全说法正确的有回答错误
+A、避免使用URLClassLoader和java.util.jar提供的自动签名检查机制
+B、不要基于不可信数据做安全检查
+C、使用安全管理器来保护敏感操作
+D、编写自定义类加载器时必须调用超类的getPermission()函数
+正确答案：ABCD    提交答案：D
+37、关于I/O操作说法正确的有回答错误
+A、对于从流中读取一个字符或字节的方法，使用Integer类型的返回值
+B、临时文件使用完毕必须及时删除
+C、在多用户系统中创建文件时指定合适的访问许可
+D、禁止将Buﬀer对象封装的数据暴露给不可信代码
+正确答案：BCD    提交答案：D
+38、些数据库隔离级别能防止脏读？回答错误
+A、TRANSACTION_SERIALIZABLE
+B、TRANSACTIONREPEATABLEREAD
+C、TRANSACTIONREADCOMMITTED
+D、TRANSACTION_DELETED
+正确答案：ABC    提交答案：D
+39、关于泛型的说法正确的有哪些？回答错误
+A、静态工具方法很适合于泛型化
+B、在集合中使用泛型，可以告诉编译器每个集合中接受哪些对象类型
+C、类的设计可优先考虑泛型
+D、数组与泛型集合相比，更灵活，应优先使用数组，而不是泛型集合
+正确答案：ABC    提交答案：D
+40、当将一个null变量视为一个正常的对象引用，且未校验该对象的状态，则会导致空指针引用，这种情况下会抛出NullPointException异常，进而可能会导致拒绝服务。常见的使用null场景如下：回答错误
+A、获取一个null的Array的长度； 
+B、访问修改null对象的字段； 
+C、调用一个null对象的方法；
+D、访问或修改Array中为null的元素；
+正确答案：ABC    提交答案：D
+41、关于异常的继承关系说法正确的有？回答错误
+A、Error类是与Exception的平级的类，用来表示Java中存在的严重错误，只能通过修改代码来解决问题。
+B、RuntimeException类是运行异常类，继承自Exception类，它以及它的子类只能在运行过程中存在，当出现时，只能修改源代码，此异常无法处理。
+C、Exception异常类及其子类都是继承自Throwable类，用来表示java中可能出现的异常，并且合理的处理这些异常。
+D、Throwable类是所有错误跟异常类的超类（祖宗类）。
+正确答案：ABCD    提交答案：D
+42、哪些类型的命名需要采用大驼峰命名？回答错误
+A、枚举
+B、常量
+C、接口
+D、包名
+正确答案：AC    提交答案：CD
+43、关于try-catch-finally-return的执行说法正确的有？回答错误
+A、finally是在return后面的表达式运算执行的，所以函数返回值在finally执行前确定的，无论finally中的代码怎么样，返回的值都不会改变，仍然是之前return语句中保存的值
+B、finally中最好不要包含return，否则程序会提前退出，返回值不是try或catch中保存的返回值
+C、当try和catch中有return语句时，finally块仍然会执行
+D、如果有异常产生，finally块中代码不会执行
+正确答案：ABC    提交答案：D
+44、使用Runtime.exec()方法的时候需要注意哪些？回答错误
+A、 禁止向Runtime.exec()方法传递不可信数据
+B、禁止使用Runtime.exec()方法
+C、避免使用 Runtime.exec()
+D、如果无法避免使用Runtime.exec()，则必须要对输入数据进行检查和净化，防止其中包含命令分隔符，管道，或者重定向操作符（“&&”，“&”，“||”，“|”，“>”，“>>”）等，以及参数开关符（“-”，“/”）。
+正确答案：ACD    提交答案：D
+45、Socket不提供但是SSLSocket提供的主要保护包括回答错误
+A、可重用性
+B、可移植性
+C、完整性保护
+D、保密性（隐私保护）
+正确答案：CD    提交答案：D
+46、关于线程并发说法正确的有哪些？回答错误
+A、CompletableFuture类的一系列async结尾的方法，可以启动一个异步任务，既可以在默认的线程池运行，也可以指定线程池。
+B、使用Thread.interrupt()或者线程同步机制终止一个线程的运行，而不是Thread.stop()
+C、多线程访问同一个共享的可变变量，需增加同步机制
+D、针对线程安全性，需要进行文档（javadoc）说明
+正确答案：ABCD    提交答案：D
+47、在JDK中，哪些类是用来实现Java反射机制的？回答错误
+A、Constructor类
+B、Array类
+C、Field类
+D、Class类
+正确答案：ABCD    提交答案：D
+48、下面的说法错误的有回答错误
+A、禁止使用私有或者弱加密算法
+B、必须使用Socket代替SSLSocket来进行安全数据交互
+C、安全场景下不需要使用强随机数
+D、禁止在日志中保存口令、密钥和其他敏感数据
+正确答案：BC    提交答案：D
+49、对于异常的理解正确的有？回答错误
+A、使用错误码来做业务逻辑错误处理，而非异常
+B、在抛出异常的时候，应该同时提供足够信息，但是需要注意符合公司安全红线和法律法规的要求，不要包含敏感信息或者个人信息。
+C、方法抛出的异常，应该与本身的抽象层次相对应
+D、不要用exception机制来做流程控制。exception机制只应该用于处理罕见的、意料之外的、导致正常流程无法继续执行的行为，而不是取代正常的业务逻辑判断。
+正确答案：BCD    提交答案：D
+50、List和Set区别有哪些？回答错误
+A、List不可以通过下标来访问，而Set可以
+B、List是有序集合，而Set是无序集合
+C、在List中允许插入重复的元素，而在Set中不允许重复元素存在
+D、List和Set均是接口，List继承了Collection接口，而Set继承了Map。
+正确答案：BC    提交答案：D
