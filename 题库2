@@ -94,3 +94,47 @@ class Solution {
        // 添加实现代码，前面可添加新方法、包含文件等修改
     }
 }
+
+假设有一棵二叉树，有n个结点，设计一个算法判断是否可以通过去掉树上的一条边将树分成两棵，且这两棵树结点之和相等。如果能找到返回true，如果不能则返回false。
+
+样例1:
+输入: [5,10,10,null,null,2,3]     
+    5
+   / \
+  10 10
+    /  \
+   2   3
+输出: True
+解释: 可拆分如下两课树，结点和均为15
+    5
+   / 
+  10      
+ 和：
+   10
+  /  \
+ 2    3
+ 
+样例2:
+输入:  [1,2,10,null,null,2,20]   
+    1
+   / \
+  2  10
+    /  \
+   2   20
+输出: False
+解释: 无法通过移除一条树边将这棵树划分成结点之和相等的两棵子树。
+注意：
+树上结点的权值范围[-100000, 100000]。
+1 <= n <= 10000
+/**
+ * Definition for a binary tree node. public class TreeNode { int val; TreeNode
+ * left; TreeNode right; TreeNode(int x) { val = x; } }
+ */
+import java.util.*;
+
+class Solution {
+    public boolean checkEqualTree(TreeNode root) {
+        // 添加实现代码，前面可添加新方法、包含文件等修改
+
+    }
+}
