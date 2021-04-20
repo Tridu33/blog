@@ -1,0 +1,302 @@
+
+
+
+1、如下的建议哪个是错误的回答正确
+A、应使用强哈希函数，推荐使用SHA-256或者更加安全的哈希函数
+B、对于抠像单向哈希时，其输出长度应该不小于256比特
+C、盐值至少应该包含16字节而且必须是由安全随机数产生
+D、迭代次数默认推荐10000次，对于性能有特殊要求（比如嵌入式系统）的产品最低可迭代1000次
+正确答案：C    提交答案：C
+2、下面关于注释的说法错误的是回答正确
+A、文件头注释必须包含版权许可，顶层public类头有功能说明、创建日期
+B、注释符与注释内容间要有2空格；右置注释与前面代码至少2空格
+C、不用的代码段直接删除，不要注释被废弃的代码
+D、方法命名无法表达的信息，必须加注释辅助说明
+正确答案：B    提交答案：B
+4、在以下哪个场景中，不需要对对象密封和数字签名来保证数据安全回答正确
+A、同一信任安全通道内传输
+B、没有使用类似于SSL传输通道
+C、敏感数据需要长久保存（比如在硬盘驱动器上）
+D、序列化或传输敏感数据
+正确答案：A    提交答案：A
+5、关于命名的说法错误的是回答正确
+A、所有标识符仅使用ASCII字母和数字，名称由正则表达式匹配\w+
+B、包名都是小写的，连续的单词简单地连接在一起（没有下划线），单词之间以点号隔开
+C、常量字段名称采用首字母小写的驼峰命名法
+D、方法名称采用首字母小写的驼峰命名法
+正确答案：C    提交答案：C
+6、以下代码有什么编码规范问题
+public static CellStyle getSuitCellStyle(XSSFWorkbook wb, int fontSize, int color, boolean bold, int underlineWidth, int fontColor) {
+    ...
+    ...
+   return cellStyle;
+}回答正确
+A、代码入参过多
+B、尽量不要使用可变数量参数
+C、代码过长
+D、代码圈复杂度高
+正确答案：A    提交答案：A
+8、以下关于分支判断说法错误的是回答正确
+A、对于if-else if（后续可能有多个else if）类型的条件判断，最后应该包含一个else分支
+B、不要写超过5个的复杂条件表达式
+C、使用卫语句可以有效的减少 if 相关的嵌套层
+D、switch-case语句要有default分支
+正确答案：B    提交答案：B
+9、public class MyClassLoader extends URLClassLoader {
+    @Override
+    protected PermissionCollection getPermissions(CodeSource cs) {
+        _____________________①___________
+        // allow exit from the VM anytime
+        pc.add(new RuntimePermission("exitVM"));
+        return pc;
+    }
+    // Other code…
+}
+_①_处代码应该为：
+A、 PermissionCollection pc = new PermissionCollection()
+B、PermissionCollection pc = new Permissions();
+C、PermissionCollection pc = super.getPermissions(cs)
+D、PermissionCollection pc = new Permissions(cs)
+正确答案：C    提交答案：C
+10、以下说法正确的是回答正确
+A、Java中volatile变量的+= , -= , *= 等复合赋值操作是不可分割的原子读改写
+B、用“==”比较2个字符串是否相等
+C、无需索引时采用for-each代替传统的for循环
+D、方法参数不要超过7个
+正确答案：C    提交答案：C
+11、java应用无法创建自己的Runtime实例，只能通过什么方法来取得当前JVM的运行时对象回答正确
+A、Runtime.exit()
+B、Runtime.getRuntime()
+C、 waitFor()
+正确答案：B    提交答案：B
+15、下列说法正确的是:回答正确
+A、代码块左大括号可以独占一行
+B、if 语句块如果比较简单, 可以不写前后大括号
+C、结束大括号不必独占一行
+D、代码块左大括号必须放在行尾
+正确答案：D    提交答案：D
+17、下列注释不符合编码规范的是
+1）
+int foo = 100; // xx变量
+2）
+int bar = 200; /* xx变量注释 */
+3）
+/**
+ * 这是多行注释
+ * 第二行
+ **/
+
+doSomething();
+4）
+/* 这是单行注释  */
+
+doSomething();回答错误
+A、1）
+B、4）
+C、3）
+D、2）
+正确答案：C    提交答案：D
+21、RSA加密算法其密钥长度需符合的最低安全要求是多少回答错误
+A、 256
+B、 3072
+C、 1036
+D、 5012
+正确答案：B    提交答案：A
+23、如下代码的输出结果为：
+public static void main(String[] args) {
+    List datas = new ArrayList(); 
+    datas.add("Jerry"); 
+    datas.add(1);
+    for (Object data : datas){ 
+       System.out.println((String)data);
+    }
+ }回答正确
+A、抛出java.lang.ClassCastException
+B、输出：Jerry
+C、输出：1
+D、输出Jerry 1
+正确答案：A    提交答案：A
+
+24、下列关于线程同步说法正确的是回答错误
+A、使用synchronized锁对象最好是一个静态常量
+B、使用Java标准库提供的高级同步机制在多线程中共享数据，其次再使用锁同步机制
+C、一般来说，在多线程场景下，如果使用锁，为了提升性能，不需要读和写都加锁，写线程需要加锁，而读的线程可以不加
+锁
+D、使用volatile关键字就可以保证线程安全
+正确答案：B    提交答案：A
+25、以下关于序列化对象中的HashMap、HashSet或HashTable等集合不能包含对象自身的引用的说法正确的是回答错误
+A、这些集合类型在反序列化的时候，会调用到当前序列化对象的hashCode方法，而此时（序列化对象还未完全加载）计算出的hashCode有可能不正确，从而导致对象放置位置错误，破坏反序列化的实例
+B、反序列化时由于重复引用有可能陷入死循环
+C、序列化时将会发生异常
+D、序列化时由于重复引用导致内存泄露
+正确答案：A    提交答案：B
+27、如果输入源或输出目标直接支持，尽可能直接使用什么进行输入输出回答正确
+A、UTF-8
+B、ASCII
+C、GBK
+D、GB2312
+正确答案：A    提交答案：A
+28、以下哪一种异常不需要对异常信息进行处理回答错误
+A、java.lang.OutOfMemoryError
+B、java.io.FileNotFoundException
+C、java.lang.NullPointerException
+D、java.sql.SQLException
+正确答案：C    提交答案：A
+29、非静态内部类可以实现下列哪种接口？回答错误
+A、Externalizabl
+B、以上都不可以
+C、Serializable
+D、Comparable
+正确答案：D    提交答案：B
+46、关于线程安全说法正确的是：回答正确
+A、多线程访问同一个可变变量，需要增加同步机制。
+B、父类的方法是线程安全的，子类在复写该方法时，需要考虑线程安全。
+C、停止线程建议使用Thread.stop方法停止线程。
+D、使用线程安全集合在多线程间共享可变数据
+正确答案：ABD    提交答案：ABD
+47、要使类成为不可变类，需要遵循哪些规则？回答错误
+A、不要提供任何会修改类状态的方法；
+B、使所有值域都成为私有；
+C、保证类不会被继承；
+D、 使所有值域都为final；
+正确答案：ABCD    提交答案：ABC
+
+1、下列的代码片段推荐使用的是（忽略实际逻辑，仅从编码规范角度考虑）
+1）
+public static List<String> demoFunction(String[] personDescs) { 
+    List<String> names = new ArrayList<>();
+    for (String personDesc : personDescs) {
+        String name = getPersonName(personDesc);
+        …… // Some other processing. 
+        names.add(name);
+    }
+
+    return names;
+}
+2）
+PrintWriter outPrint = null;
+try {
+    outPrint = new PrintWriter("file.txt");
+    for (int i = 0; i < 100; i++) {
+        out.println("write content" + i);
+    }
+} finally{ 
+    IOUtils.closeQuietly(out);
+}
+3）
+List<String> list = new ArrayList<>();
+list.add....
+String[] array = list.toArray(new String[0]);
+4）
+int[] src = { 1, 2, 3, 4, 5 };
+int[] dest = new int[5];
+for (int i = 0; i < 5; i++) {
+    dest[i] = src[i];
+}回答错误
+A、1）
+B、2）
+C、4）
+D、3）
+正确答案：D    提交答案：C
+2、下列关于equals方法的说法错误的是：回答错误
+A、覆写equals方法时，不需要同时覆写hashCode方法
+B、如果两个对象调用equals方法时不相等，则这两个对象的hashCode方法，不要求其返回值不同，但是出于性能考虑，但最好能不同
+C、如果两个对象调用equals方法时相等，则这两个对象的hashCode方法，也必须返回相同的值
+D、同一次运行中，同一个对象如果equals方法中用到的信息没有改变，多次调用hashCode方法返回值必须相同
+正确答案：A    提交答案：C
+4、关于异常的处理哪个是错误的回答错误
+A、java.util.jar.JarException会透露文件名，从而获取到关键的文件名信息
+B、FileNotFoundException会透露文件系统的结构信息，而通过异常本身的类型，可以得知所请求的文件不存在
+C、不要直接捕获NullPointException，除非调用开源三方件，三方件中抛出NullPointerException异常时，可以捕获NullPointerException，并对该异常进行处理
+D、不要调用System.exit()终止JVM
+正确答案：A    提交答案：C
+9、下面关于变量声明的编码规范描述, 正确的是:回答正确
+A、上面描述都是错的
+B、变量被声明在接近它们首次使用的行
+C、变量应该在方法开始的地方集中声明
+D、局部变量使用前不需要先初始化
+正确答案：B    提交答案：B
+16、关于日志的说法错误的是回答错误
+A、非仅限于中文区销售产品禁止用中文打印日志
+B、日志工具Logger类的实例应声明为private static final
+C、日志可分为以下级别：debug、info、warning、error、fatal。推荐与具体实现有关的日志记录info级
+D、日志的记录，不要使用System.out与System.err进行控制台打印，进行处理应使用Facade模式的日志框架
+正确答案：C    提交答案：A
+
+18、抛出异常细节信息中，以下正确的是回答正确
+A、抛出异常细节信息不需要记录的很详细。
+B、抛出异常信息中如果含有敏感信息，可以记录日志快速定位。
+C、在抛出异常的时候，应该同时提供足够信息，以便对分析"异常是如何产生的"有帮助，比如"对该异常有贡献"的参数和变量的值等任何信息都可以做记录。
+D、在异常细节信息记录，应注意符合公司安全红线和法律法规的要求，不要包含敏感信息或者个人信息
+正确答案：D    提交答案：D
+19、以下说法正确的是回答正确
+A、创建新线程时可以使用默认线程名
+B、Thread内部会使用"Thread-"+nextThreadNum()作为线程的默认名字，所以创建新线程不需要指定线程名
+C、创建新线程不指定线程名可能导致空指针
+D、创建新线程时指定线程名需具有业务相关性
+正确答案：D    提交答案：D
+22、以下程序输出的结果有可能是：
+ public static void main(String[] args) {
+        CompletableFuture.supplyAsync(() -> Thread.currentThread().getName())
+            .thenApply(i -> i + ",")
+            .whenComplete((r, e) -> System.out.print(r + Thread.currentThread().getName()));
+    }回答正确
+A、,main
+B、nullmain
+C、main,main
+D、ForkJoinPool.commonPool-worker-1,main
+正确答案：D    提交答案：D
+26、对内置锁的描述错误的是回答错误
+A、内置锁是显示锁，需要显示进行 lock 以及 unlock 操作
+B、内置锁是一个互斥锁，不仅读写互斥并且读读也互斥，最多只有一个线程能够获得该锁
+C、内置锁是可重入锁，如果已经获取了一个锁对象，在还没释放时又要执行该锁对象的另一个代码块或方法，则不需要再次给这个对象加锁就可以直接执行
+D、内置锁是非公平锁，线程在竞争synchronized锁时并不遵循先到等待队列就先获得锁
+正确答案：A    提交答案：D
+27、哪个是xml格式的反序列化常见的第三方组件回答正确
+A、XMLStream
+B、XMLDecoder
+C、XDecoder
+D、XMLTrans
+正确答案：B    提交答案：B
+28、下列哪个符合类，枚举，接口命名规范？回答正确
+A、info
+B、XMLService
+C、marcoPolo
+D、XmlService
+正确答案：D    提交答案：D
+30、一段使用ZipInputStream对压缩文件进行解压的代码如下，在[1]处填入适合的关键字是（）
+public RandomAccessFile openFile(java.io.File f) {
+        [1] java.io.File copyFile = new java.io.File(f.getPath());
+        askUserPermission(copy.getPath());
+
+        //...
+
+        return (RandomAccessFile) AccessController.doPrivileged(new PrivilegedAction() {
+            public Object run() {
+                try {
+                    return new RandomAccessFile(copyFile, copyFile.getPath());
+                } catch (Exception e) {
+                     //...
+                }
+                return null;
+            }
+        });
+    }回答正确
+A、volatile
+B、final      
+C、static
+D、private
+正确答案：B    提交答案：B
+
+34、处于性能的考虑，初始化一些哪些集合时，最好指定其初始化容量回答错误
+A、StringBuilder
+B、HashMap
+C、HashSet
+D、ArrayList
+正确答案：ABCD    提交答案：BCD
+38、在耗时严重或阻塞的操作中持有锁，会严重降低系统的性能，导致系统资源耗尽。阻塞操作一般包括：回答正确
+A、网络
+B、文件
+C、控制台I/O
+D、对象序列化
+正确答案：ABCD    提交答案：ABCD
