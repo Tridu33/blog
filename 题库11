@@ -300,3 +300,106 @@ B、文件
 C、控制台I/O
 D、对象序列化
 正确答案：ABCD    提交答案：ABCD
+
+4、下面哪个说法是错误的回答正确
+A、方法的参数个数不应超过5个
+B、当以传引入的方式传递参数，而且需要调用者能获取到方法内修改的结果时，可用入参当工作变量
+C、不要把方法的入参当做工作变量/临时变量
+D、Java编码中禁止使用可变数量参数的方法
+正确答案：D    提交答案：D
+
+7、关于多线程的说法错误的是回答正确
+A、采用Java1.5提供新并发工具代替wait和notify。原来wait和notify写的老代码都应该进行整改
+B、不要依赖线程调度器、线程优先级和yield()方法
+C、多线程访问同一个共享的可变变量，需增加同步机制
+D、创建新线程时需指定线程名，指定线程名可以给问题定位带来很多方便
+正确答案：A    提交答案：A
+
+9、关于下面的代码片段说法正确的是
+public boolean isProperName(String s) {
+     String names[] = s.split(" ");
+     if (names.length != 2) {
+         return false;
+     }
+     return (isCapitalized(names[0]) && isCapitalized(names[1]));
+}回答错误
+A、此段代码没有判断入参为null的情况，从而导致空指针解引用问题
+B、此段代码仅仅存在编码规范的格式问题
+C、此段代码不存在问题
+D、此段代码没有判断数组names是否为null的情况，从而导致空指针解引用问题该方法
+正确答案：A    提交答案：D
+13、关于如下代码说法正确的是
+public static void main(String[] args) {
+    try {
+        System.out.println("hello:" + func());
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+public static int func() throws Exception {
+    int a = 1;
+    for (int i = 1; i < 2; i++) {
+        try {
+            throw new Exception("xx");
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+           continue;
+        }
+    }
+    return 0;
+}回答正确
+A、最终会打印0
+B、最终会抛出异常
+C、最终会打印hello:0
+D、最终会打印hello并抛出异常
+正确答案：C    提交答案：C
+14、下面说法正确的是:回答错误
+A、 静态初始化块与其他方法之间可以不用空行隔开
+B、方法与方法之间可以不用空行隔开
+C、字段与构造方法之间可以不用空行隔开
+D、字段与字段之间可以不用空行隔开
+正确答案：D    提交答案：A
+16、下面方法的命名不符合编码规范的是回答错误
+A、public void AddKeyListener()
+B、public void sendMessage()
+C、public void draw()
+D、public void onCreate()
+正确答案：A    提交答案：C
+18、下面哪个说法是正确的回答错误
+A、禁止序列化非静态的内部类
+B、禁止序列化静态的内部类
+C、禁止序列化非静态的外部类
+D、禁止序列化静态的外部类
+正确答案：A    提交答案：B
+19、使用SSLSocket代替Socket的原因？回答正确
+A、效率更快
+B、减低效率
+C、更安全 
+D、更简单
+正确答案：C    提交答案：C
+20、以下关于线程说法错误的是回答正确
+A、线程池不应该使用 Executors 去创建，而是通过 ThreadPoolExecutor 的方式，这样的处理方式更加明确线程池的运行规则，规避资源耗尽的风险。
+B、创建新线程时指定线程名需具有业务相关性
+C、当调用Thread.yield()函数时,线程调度器会停止正在进行执行的线程任务，从而执行当前线程
+D、Java虚拟机能够管理的线程数量有限，不加控制的创建新线程可能会导致Java虚拟机崩溃。
+正确答案：C    提交答案：C
+21、敏感数据传输过程中为防止窃取和非法篡改，下面做法正确的是回答错误
+A、只数字签名
+B、只加密
+C、先加密再数字签名
+D、先数字签名再加密
+正确答案：D    提交答案：C
+26、Socket不提供但是SSLSocket提供的主要保护不包括回答正确
+A、认证
+B、保密性（隐私保护）
+C、可移植性
+D、完整性保护
+正确答案：C    提交答案：C
+
+29、那个不是推荐的加密算法回答正确
+A、ECDSA
+B、RSA
+C、SHA1
+D、AES
+正确答案：C    提交答案：C
