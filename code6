@@ -1,0 +1,462 @@
+do {
+myFoo = sharedFoo; // (3) volatile读操作：读sharedFoo里的值
+} while (myFoo == null); // 不等于null就证明(2)happens before(3)
+System.out.println(myFoo.nr); // (4) 读操作：(2)happens before(3)，返回值为42
+}
+int data; // (0) 写初值0
+boolean flag;
+Object lock;
+
+著名的双检锁(double-checked locking)模式是一个特例。它在读线程中不加锁，只在写的时候加
+锁，利用此法在惰性初始化中减少锁的代价，广泛运用于单例模式的实现。在Java中，双检锁需要用
+volatile配合锁共同实现同步才能正确实现（熟练的程序员可以使用Java 9引入的acquire和release语义
+实现）。维基百科中有在Java中正确实现“双检锁”的例子。
+3.8.2 锁
+P.03 使用相同的顺序请求和释放锁来避免死锁
+【描述】
+为避免多线程而导致的数据冲突，必须对共享数据进行保护，防止共享数据被并行的修改和访问。可以
+使用同步方法、同步代码块或Java.util.concurrent 动态锁对象执行锁定来保护共享数据，然而过多
+的使用锁有可能会导致死锁。
+Java自身不能防止死锁。当两个或多个线程以不同的顺序请求和释放锁时，就可能会发生死锁。所以程
+序必须以相同的顺序来请求和释放锁，避免产生死锁。
+不能为了避免死锁的发生，扩大锁的使用范围，影响系统性能。
+【反例】（不同的锁次序）
+void thread1() {
+data = 42; // (1) 写data
+synchronized (lock) { // (2) 加锁
+flag = true; // (3) 写flag
+} // (4) 解锁
+}
+void thread2() {
+boolean myFlag;
+do {
+// synchronized (lock) { // (4.5) 补上这个synchronized块后，有加锁操作，可以修正问题
+myFlag = flag; // (5) 读flag
+} while (!myFlag);
+int myData = data; // (6) 读data
+System.out.println(myData); // 输出可能不是42！
+}
+final class BankAccount {
+private double balanceAmount; // 银行账户中的总金额
+BankAccount(double balance) {
+this.balanceAmount = balance;
+}
+// 将当前账户对象的存款转寄给另一个银行账号实例ba
+private void depositAmount(BankAccount ba, double amount) {
+synchronized (this) {
+synchronized (ba) {
+if (amount > balanceAmount) {
+throw new IllegalArgumentException(
+"Transfer cannot be completed");
+}
+ba.balanceAmount += amount;
+this.balanceAmount -= amount;
+}
+}
+}
+public static void initiateTransfer(BankAccount first, BankAccount second,
+double amount) {
+
+上述示例中会存在死锁的情况。当bankA和bankB两个银行账户同步互相进行转账时，就可能会导致死
+锁的问题。
+【正例】（顺序锁）
+Thread transfer = new Thread(new Runnable() {
+public void run() {
+first.depositAmount(second, amount);
+}
+});
+transfer.start();
+}
+public static void main(String[] args) {
+BankAccount bankA = new BankAccount(15000);
+BankAccount bankB = new BankAccount(9000);
+initiateTransfer(bankA, bankB, 500);
+initiateTransfer(bankB, bankA, 1400);
+...
+}
+}
+final class BankAccount implements Comparable<BankAccount> {
+private static AtomicLong nextId = new AtomicLong(0); // 下一个未使用的ID
+private double balanceAmount; // 银行账户中的总金额
+private final long id; // 每一个银行账户的id都是唯一的
+private BankAccount(double balance) {
+this.balanceAmount = balance;
+this.id = nextId.getAndIncrement();
+}
+@Override
+public int compareTo(BankAccount ba) {
+return (this.id > ba.id) ? 1 : (this.id < ba.id) ? -1 : 0;
+}
+// 将当前账户对象的存款转寄给另一个银行账号实例ba
+public void depositAmount(BankAccount ba, double amount) {
+BankAccount former;
+BankAccount latter;
+if (compareTo(ba) < 0) {
+former = this;
+latter = ba;
+} else {
+former = ba;
+latter = this;
+}
+synchronized (former) {
+synchronized (latter) {
+if (amount > balanceAmount) {
+throw new IllegalArgumentException("XXX...");
+}
+ba.balanceAmount += amount;
+this.balanceAmount -= amount;
+}
+}
+}
+public static void initiateTransfer(BankAccount first, BankAccount second,
+double amount) {
+Thread transfer = new Thread(new Runnable() {
+
+上述示例可以确保以相同的顺序获得和释放多个锁。如上BankAccount 对象有一致的次序，实现了
+java.lang.Comparable 接口，并覆写了compareTo 方法。当发生转账时，会对两个BankAccount 对
+象先进行排序，再按排序结果顺序锁定两个BankAccount 对象。当两个线程向同样的两个账户互相转
+账时，这两个线程会按相同的次序对账户进行锁定，这样就可以保证只有一个线程完成转账后，另一个
+线程才能获取到所有的锁，然后进行转账操作。
+【正例】（ReentrantLock）
+@Override
+public void run() {
+first.depositAmount(second, amount);
+}
+});
+transfer.start();
+}
+}
+final class BankAccount {
+private double balanceAmount; // 银行账户中的总金额
+private final Lock lock = new ReentrantLock();
+private final Random number = new Random(123L);
+BankAccount(double balance) {
+this.balanceAmount = balance;
+}
+// 将当前账户对象的存款转寄给另一个银行账号实例ba
+private void depositAmount(BankAccount ba, double amount)
+throws InterruptedException {
+while (true) {
+if (this.lock.tryLock()) {
+try {
+if (ba.lock.tryLock()) {
+try {
+if (amount > balanceAmount) {
+throw new IllegalArgumentException(
+"Transfer cannot be completed");
+}
+ba.balanceAmount += amount;
+this.balanceAmount -= amount;
+break;
+} finally {
+ba.lock.unlock();
+}
+}
+} finally {
+this.lock.unlock();
+}
+}
+int n = number.nextInt(1000);
+int time = 1000 + n; // 1秒+随机时间的延迟，防止livelock
+Thread.sleep(time);
+}
+}
+public static void initiateTransfer(BankAccount first, BankAccount second,
+double amount) {
+Thread transfer = new Thread(new Runnable() {
+public void run() {
+try {
+first.depositAmount(second, amount);
+} catch (InterruptedException ex) {
+Thread.currentThread().interrupt(); // 重置中断状态
+
+每个BankAccount 都有一个ReentrantLock 锁。此设计允许depositAmount() 方法尝试获取两个帐
+户的锁，如果失败则释放锁，并在必要时稍后重试。
+G.CON.01 对共享变量做同步访问控制时需避开同步陷阱
+【级别】 要求
+【描述】
+常见同步陷阱1：使用了基于高层并发对象的synchronized块
+高层并发类是指实现java.util.concurrent.locks 包中的Lock 或Condition 接口的类，其本身提
+供了lock 与unlock 来实现同步，不应将这些类的对象作为synchronized 块的同步对象使用。当使
+用基于高层并发对象的synchronized 块时，容易被误认为这种方式与正常使用lock 接口的方式是同
+一个锁，而实际是两个不同的锁，会导致无法实现同步控制。
+【反例】
+【正例】
+常见同步陷阱2：使用实例锁来同步静态共享变量
+实例锁的同步效果仅限于此实例本身，无法用来同步静态共享变量；如果试图使用实例锁来同步静态共
+享变量，在多实例情况下无法实现符合预期的同步效果。
+【反例】
+}
+}
+});
+transfer.start();
+}
+}
+public class SomeSharedResource {
+private final Lock lock = new ReentrantLock();
+public void updateResource() {
+synchronized (lock) {
+// 更新共享的资源
+...
+}
+}
+}
+public class SomeSharedResource {
+private final Lock lock = new ReentrantLock();
+public void updateResource() {
+lock.lock();
+try {
+// 更新共享的资源
+...
+} finally {
+lock.unlock();
+}
+}
+}
+
+【正例】
+常见同步陷阱3：使用可被重用的对象锁
+如果使用可被重用的对象作为同步对象，容易导致不同的共享变量实际依赖了同一个锁，无法实现符合
+预期的同步效果。常见的可被重用的对象包括Boolean、封包的Integer对象、String常量等。
+【反例】
+【正例】（使用不可被重用的对象）
+常见同步陷阱4：使用class类对象锁
+public class SomeSharedResource {
+private static volatile int counter;
+private final Object lock = new Object();
+public void updateResource() {
+synchronized (lock) {
+counter++;
+}
+}
+}
+public class SomeSharedResource {
+private static volatile int counter;
+private static final Object lock = new Object();
+public void updateResource() {
+synchronized (lock) {
+counter++;
+}
+}
+}
+public class SomeSharedResource {
+private final String lock = "lock";
+public void updateResource() {
+synchronized (lock) {
+// 更新共享的资源
+...
+}
+}
+}
+public class SomeSharedResource {
+private final Object lock = new Object();
+public void updateResource() {
+synchronized (lock) {
+// 更新共享的资源
+...
+}
+}
+}
+
+如果使用class类对象作为同步对象，父子类继承关系增加了class类对象归属的复杂度，开发人员容易
+犯错，导致同步行为不符合预期；故应避免使用class这类容易造成歧义的对象，而应使用明确的对象。
+【反例】
+【正例】（使用明确的锁对象）
+G.CON.02 在异常条件下，保证释放已持有的锁
+【级别】 要求
+【描述】
+一个线程中没有正确释放持有的锁会导致其他线程无法获取该锁对象，导致阻塞。在发生异常时，需要
+确保程序正确释放当前持有的锁。在异常条件下，同步方法或者块同步中使用的对象内置锁会自动释
+放。但是大多数的Java锁对象并不是Closeable，无法使用try-with-resources功能自动释放，在这种情
+况下需要主动释放锁。
+【反例】（可检查异常）
+// 示例1
+public class SomeSharedResource {
+public static void updateResource() {
+synchronized (SomeSharedResource.class) {
+// 更新共享的资源
+...
+}
+}
+}
+// 示例2
+public class SomeSharedResource {
+public void updateResource() {
+synchronized (this.getClass()) {
+// 更新共享的资源
+...
+}
+}
+}
+public class SomeSharedResource {
+private final Object lock = new Object();
+public void updateResource() {
+synchronized (lock) {
+// 更新共享的资源
+...
+}
+}
+}
+public final class Foo {
+private final Lock lock = new ReentrantLock();
+public void incorrectReleaseLock() {
+try {
+lock.lock();
+doSomething();
+lock.unlock();
+} catch (MyBizException ex) {
+// 处理异常
+
+上述代码示例中，使用了ReentrantLock 锁，当doSomething() 方法抛出异常时，catch代码块中没
+有释放锁操作，导致锁没有释放。
+【正例】（finally代码块）
+上述代码示例中，成功执行锁定操作后，将可能抛出异常的操作封装在try代码块中。锁在执行try代码
+块前获取，可保证在执行finally代码时正确持有锁。在finally代码块中调用lock.unlock() ，可以保证
+不管是否发生异常都可以释放锁。
+【反例】（未检查异常）
+上述代码示例中，当incorrectReleaseLock() 方法传入的String不是数字时，后续的操作会抛出
+NumberFormatException ，导致锁未被正确释放。
+【正例】（finally代码块）
+}
+}
+private void doSomething() throws MyBizException {
+...
+}
+}
+public final class Foo {
+private final Lock lock = new ReentrantLock();
+public void correctReleaseLock() {
+lock.lock();
+try {
+doSomething();
+lock.unlock();
+} catch (MyBizException ex) {
+// 处理异常
+} finally {
+lock.unlock();
+}
+}
+private void doSomething() throws MyBizException {
+...
+}
+}
+final class Foo {
+private final Lock lock = new ReentrantLock();
+public void incorrectReleaseLock(String value) {
+lock.lock();
+...
+int index = Integer.parseInt(value);
+...
+lock.unlock();
+}
+}
+final class Foo {
+private final Lock lock = new ReentrantLock();
+public void correctReleaseLock(String value) {
+lock.lock();
+
+上述代码示例中，成功执行锁定操作后，将可能抛出异常的操作封装在try代码块中。锁在执行try代码
+块前获取，可保证在执行finally代码时正确持有锁。在finally代码块中调用lock.unlock() ，可以保证
+不管是否发生异常都可以释放锁。
+G.CON.03 避免在持有锁时执行耗时或阻塞性的操作
+【级别】 建议
+【描述】
+持有锁时执行耗时或阻塞性操作会严重降低系统性能，且可能导致线程饥饿。此外可能会导致依赖本线
+程的其它线程无限期阻塞。阻塞性操作包括网络、文件、控制台I/O和对象序列化等，线程无限期的等
+待也属于阻塞性的操作。程序应该避免在持有锁的时候执行阻塞性的操作。
+【反例】
+这个例子定义了一个sendMessage 的方法，加synchronized 的目的是为了多线程并发场景下，保护
+messageBuff 。但是writeObject 方法是一个网络IO操作，属于阻塞性操作，在高时延、网络丢包的
+情况下会导致线程的长时间等待，就像死锁一样。
+【正例】
+try {
+...
+int index = Integer.parseInt(value);
+...
+} finally {
+lock.unlock();
+}
+}
+}
+private List<Message> messageBuff = new ArrayList[MAX_BUFF_SIZE];
+public void sendMessage(Socket socket, String targetUid) throws IOException {
+try (ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
+synchronized(messageBuff) {
+Iterator<Message> iterator = messageBuff.iterator();
+while (iterator.hasNext()) {
+Message message = iterator.next();
+if (message.getTargetUid().equals(targetUid)) {
+out.writeObject(message);
+iterator.remove();
+}
+}
+}
+}
+}
+private List<Message> messageBuff = new ArrayList[MAX_BUFF_SIZE];
+public void sendMessage(Socket socket, String targetUid) throws IOException {
+List<Message> candidateMessage = getCandidateMessage(targetUid);
+if (!candidateMessage.isEmpty()) {
+writeMessageToStream(socket, candidateMessage);
+}
+}
+public List<Message> getCandidateMessage(String targetUid) {
+List<Message> candidates = new ArrayList<>();
+synchronized (messageBuff) {
+
+上述示例中，把处理方法分成两个部分，在getCandidateMessage 方法中完成对messageBuff 的加锁
+访问，然后调用不需要同步的writeMessageToStream 方法，完成IO操作。
+【例外】
+对外同时提供了终止阻塞操作的方法。
+G.CON.04 避免使用不正确形式的双重检查锁
+【级别】 要求
+【描述】
+双重检查锁（double-checked locking）是一种软件设计模式，通常用于延迟初始化单例。主要通过在
+进行获取锁之前先检查单例对象是否创建（第一次检查），在获取锁以后，再次检查对象是否创建（第
+二次检查），以此减少并发获取锁的开销。
+但是不正确的使用双重检查锁，存在延迟初始化的Java优化问题隐患。也就是会导致一个线程发布了一
+个未初始化或部分初始化的对象被另外一个线程引用。
+【反例】
+Iterator<Message> iterator = messageBuff.iterator();
+while (iterator.hasNext()) {
+Message msg = iterator.next();
+if (msg.getTargetUid().equals(targetUid)) {
+candidates.add(msg);
+iterator.remove();
+}
+}
+}
+return candidates;
+}
+public void writeMessageToStream(Socket socket, List<Message> messages)
+throws IOException {
+try (ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
+for (Message message : messages) {
+out.writeObject(message);
+}
+}
+}
+final class Singleton {
+private static Singleton instance = null;
+private static final Object LOCK = new Object();
+private Singleton() {
+...
+}
+public static Singleton getSingletonInstance() {
+if (instance == null) {
+synchronized (LOCK) {
+if (instance == null) {
+instance = new Singleton();
+}
+}
+}
+return instance;
+}
+}
+
+以上例子，当一个线程完成对成员属性instance 的赋值时，并未完成对象的完全初始化，也就是说此
+时另外一个并发线程调用getSingletonInstance() 会得到一个指向Singleton 对象的非空引用，然
+而该对象的数据成员可能是默认值，而不是构造方法中设置的值。
+【正例】
+把instance 声明为volatile ，当一个线程初始化Singleton 对象时，会在这个线程和其他任何获取
+该实例的线程之间建立起happens-before关系。避免使用到未初始化完全的对象引用。
