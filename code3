@@ -1,0 +1,572 @@
+
+import com.hisilicon.xx.Yyz; // 海思
+import com.huawei.xx.Yyz; // 华为公司
+import com.google.common.io.Files; // 其它商业组织
+import harmonyos.xx.Yyz; // 开源第三方
+import lombok.extern.slf4j.Sl4j; // 开源第三方
+import maple.xx.Yyz; // 开源第三方
+import maven.xx.Yyz; // 开源第三方
+import net.sf.json.xx.Yyz; // net/org开源组织
+import org.linux.apache.server.SoapServer; // net/org开源组织
+import javacard.xx.Yyz;
+import java.io.IOException; // Java最基础的包
+import java.net.URL;
+import java.rmi.RmiServer; // Java的其它包
+import java.rmi.server.Server;
+import javax.swing.JPanel; // Java的扩展包
+import javax.swing.event.ActionEvent;
+
+【级别】 建议
+【描述】
+在 if ， else ， switch ， for ， do 和 while 等语句中，即使程序体是空的或只包含一个语句，也
+应该使用大括号。对switch 里面的case 和default ，大括号是可选的。
+G.FMT.06 对于非空块状结构，左大括号应该放在行尾，右大括号应该另起一行
+【级别】 建议
+【描述】
+对于非空块状结构（含初始化块），大括号应该遵循K&R风格：
+左大括号不换行；
+右大括号自己单独一行；
+右大括号后，可以跟逗号、分号等，也可以跟随 else 、 catch 、finally 等关键字语句。
+【反例】 （多块语句）
+【正例】
+对于枚举类的例外，可参考枚举。
+G.FMT.07 应该避免空块，必须使用空块时，应采用统一的大括号换行风格
+【级别】 建议
+【描述】
+程序中应避免空块，但对于工具自动生成的、用于被覆盖的场景（例如UI监听器），可能需要定义空的
+方法体；忽略异常时也可能使用空的catch块。
+try {
+doSomething();
+} catch (MyException ex) { handleException(ex); }
+return () -> {
+while (condition()) {
+method();
+}
+};
+return new MyClass() {
+@Override
+public void method() {
+if (condition()) {
+try {
+something();
+} catch (ProblemException ex) {
+recover();
+}
+} else if (otherCondition()) {
+somethingElse();
+} else {
+lastThing();
+}
+}
+};
+
+空块状结构既可遵循前面的大括号排版格式要求，也可以在大括号打开后立即关闭，产品应考虑使用统
+一的风格。
+【正例】
+2.3.3 缩进
+G.FMT.08 使用空格进行缩进，每次缩进4个空格
+【级别】 建议
+【描述】
+只允许使用空格（space）进行缩进，每次缩进为4个空格。不允许插入制表符tab、换页符等。
+当前几乎所有的集成开发环境（IDE）和代码编辑器都支持配置将Tab键自动扩展为4空格输入，应在代
+码编辑器中配置使用空格进行缩进。
+【例外】
+方法参数换行、字符串+语句换行、方法连续操作符.调用，这些特殊场景，业界流行工具Eclipse、
+IntelliJ IDEA，默认缩进8个空格，也是可以的。
+2.3.4 行内容
+G.FMT.09 每行不超过一个语句
+【级别】 建议
+【描述】
+每个语句后面都应该有一个换行符。
+2.3.5 行宽
+G.FMT.10 行宽不超过120个窄字符
+【级别】 建议
+【描述】
+一个宽字符占用两个窄字符的宽度。除非另有说明，否则任何超出此限制的行都应该换行，如换行一节
+中所述。
+每个Unicode代码点都计为一个字符，即使其显示宽度大于或小于一个字符。如果使用全角字符，可以
+选择比此规则建议的位置更早地换行。
+字符的“宽”与“窄”由它的east asian width Unicode属性定义。通常，窄字符也称“半角”字符，ASCII字符
+集中的所有字符，包括字母（如： a 、A ）、数字（如： 0 、3 ）、标点（如, 、{ ）、空格，都是窄
+字符；宽字符也称“全角”字符，汉字（如： 中、文）、中文标点（ ， 、、）、全角字母和数字（如
+Ａ 、３ ）等都是宽字符，算2个窄字符。
+【例外】
+1. Javadoc中的长URL或长JSON方法引用；
+void doNothing() {} // 产品这样统一可以
+void doNothingElse() { // 产品这样统一也可以
+}
+
+2. package 和import 语句；
+3. 注释中的命令行，使它可以剪切并粘贴到shell中使用。
+2.3.6 换行
+G.FMT.11 换行起点在点号、双冒号、类型&、catch块中管道之前，在方法左括
+号、逗号、lambda箭头和其左大括号之后
+【级别】 建议
+【描述】
+1. 当在非赋值运算符处断行时，中断点出现在符号之前。
+这也适用于以下“类似运算符”的符号：
+点分隔符（ . ）；
+方法引用的两个冒号（ :: ）；
+类型限定中的&符号（ <T extends Foo & Bar> ）；
+catch块中的管道（ catch (FooException | BarException ex) ）。
+【正例】
+2. 方法或构造方法名与紧跟其后面的左括号（ ( ）保持在同一行。
+3. 逗号（ , ）断点出现在逗号之后。
+4. 在lambda表达式中，如果箭头后是单个表达式，可以在箭头后面出现断点，如果箭头后是程序
+块，可以在大括号后出现断点。
+【正例】
+2.3.7 空行
+G.FMT.12 减少不必要的空行，保持代码紧凑
+【级别】 建议
+【描述】
+减少不必要的空行，可以显示更多的代码，方便代码阅读。建议：
+根据上下内容的相关程度，合理安排空行：空行出现在属性，构造方法，方法，嵌套类，静态初始
+化块之间；
+方法内部、类型定义内部、初始化表达式内部，不使用连续空行；
+// 链式方法调用
+Student student = Student.builder()
+.setName("zhangsan")
+.setAge(14)
+.setGrade("7年级")
+.setMajor("软件工程")
+.setNo("123456789")
+.build();
+MyLambda<String, Long, Object> lambda =
+(String label, Long value, Object obj) -> {
+...
+};
+Predicate<String> predicate = str ->
+longExpressionInvolving(str);
+
+不使用连续3个或更多空行；
+大括号内的代码块行首之前和行尾之后不要加空行，包括类型和方法定义、语句代码块。
+【反例】
+2.3.8 水平空格
+G.FMT.13 用空格突出关键字和重要信息
+【级别】 建议
+【描述】
+水平空格应该突出关键字和重要信息。单个空格应该分隔关键字与其后的左括号、与其前面的右大括
+号，出现在任何二元/三元运算符/类似运算符的两侧， ,:; 或类型转换结束括号) 之后使用空格。行尾
+和空行不应有空格space。总体规则如下：
+必须加空格的场景：
+（包括复合）赋值运算符前后，例如= 、*= 等；
+逗号, 、非for-in的冒号: 、for循环等分隔的; 符号之后加空格；
+二元运算符、类型并交的| 和& 符号、for-in的冒号: 的前后两侧，例如base + offset ；
+lambda表达式中的箭头前后，例如str -> str.length() ；
+方法声明、条件判断语句、循环语句等场景下的) 与{ 之间加空格，例如： void func()
+{...} 。
+禁止加空格的场景：
+super 、this 等少数关键字之后（多数关键字之后自然地须加空格）；
+成员访问操作符前后，例如instance.member ；
+圆括号、方括号、注解或数组等非换行的大括号内两侧；
+一元运算符前后，例如cnt++ ；
+方法声明或者方法调用的左括号之前。
+G.FMT.14 不应插入空格水平对齐
+【级别】 建议
+【描述】
+水平对齐是在代码中添加可变数量的附加空格的做法，目的是使某些标记直接出现在前一行的某些其他
+标记下方。
+int foo() {
+...
+}
+int bar() { // 不推荐：最多使用连续2个空行
+...
+}
+int baz() {
+doSomething(); // 不推荐：大括号内部首尾，不需要空行
+...
+}
+
+不应插入空格对齐，包括在Javadoc的注释性描述内容前。原因是：
+如果参数/变量名长短差异较大，无规律插入的空白呈凹凸状，并不美观；
+如果某个参数/变量名较长，例如gardenPlantingDetailViewModel ，对应的描述内容也较长的
+话，就可能不得不换行，又可能会有换行对齐的顾忌；
+后续的维护者可能会困扰是否在整个module/package都刻意追求对齐。
+因此，对齐的弊大于利；为了减少维护成本，不造成困扰，不对齐是最好的选择。
+【正例】
+【反例】
+【例外】
+如果数据位对齐可提升代码的可读性（如用一组16进制数来表示不同的状态等含义时），可以通过插入
+空格保持水平对齐，使代码更可读。例如：
+2.3.9 枚举
+G.FMT.15 枚举常量间用逗号隔开，换行可选
+【级别】 建议
+【描述】
+在枚举常量后面的每个逗号之后，换行符是可选的。还允许额外的空白行（通常只有一行）。例如：
+没有方法且没有关于其常量的注释的枚举类，可以选择写成类似数组初始化的格式：
+由于枚举类是类，因此类遵循的所有其他排版规则都适用于枚举。
+Java的枚举比较灵活强大，而且与switch / case 结合较好，只要可能，优先使用。
+private int nr;
+private Color color;
+private int foo; // 维护者可能不得不修改这些对齐空格数
+private Color color; // 不必与上行对齐注释
+static final int BRIDGE = 0x00000040;
+static final int VARARGS = 0x00000080;
+static final int SYNTHETIC = 0x00001000;
+static final int ANNOTATION = 0x00002000;
+private enum Encoding {
+UTF8 {
+@Override
+public String toString() {
+return "UTF-8";
+}
+},
+UTF16,
+US_ASCII
+}
+private enum Size {SMALL, MEDIUM, LARGE}
+
+枚举的使用场景：
+布尔型的两元素值，例如isCelsius = true | false 来表示摄氏|华氏可用；
+变量值仅在一个固定范围内变化用enum 类型来定义。例如G.DCL.04的Keyboard例子；
+整数或字符串的枚举模式，蕴含有某种命名空间的，例如上面的Size 例子，或者其它语言的
+ComparisonResult ，避免-1、0、1的数字比较。
+2.3.10 switch语句
+术语：switch块的大括号内有一个或多个语句组。每个语句组由一个或多个开关标签（ case FOO: 或
+者default: ）组成，后跟一个或多个语句（对于最后一个语句组，包含零个或多个语句）。
+当switch括号内的变量类型为String时，确保变量非空。
+G.FMT.16 case语句块结束时如果不加break，需要有注释说明（fall-through）
+【级别】 建议
+【描述】
+在switch块内，每个语句组要么突然终止（用break ， continue ， return 或抛出异常），要么标有
+注释，表明执行会或可能会持续到下一个语句组。任何符合fall-through概念的注释都可以（通常是//
+fall through ）。在switch块的最后一个语句组中不需要此特殊注释。
+Eclipse和IntelliJ IDEA支持$FALL-THROUGH$ 这种特殊的注释来suppress缺少break 的告警。尽管这不
+是Java的标准，但它被主流的IDE支持，推荐优先使用。
+注意，当javac开启 -Xlint:fallthrough 选项编译时 ，加与不加$FALL-THROUGH$ ，可能都会告警；
+修复此告警可以考虑改用if else if 写法替代switch case 。
+如果case 语句是空语句，则可以不用加注释特别说明。
+【正例】
+2.3.11 注解
+public enum TemperatureScale {CELSIUS, FAHRENHEIT}
+public enum ComparisonResult {
+ORDERED_ASCENDING,
+ORDERED_SAME,
+ORDERED_DESCENDING
+}
+switch (label) {
+case 0:
+case 1:
+System.out.println("1");
+// $FALL-THROUGH$
+case 2:
+System.out.println("2");
+// $FALL-THROUGH$
+case 3:
+System.out.println("3");
+break;
+default:
+System.out.println("Default case!");
+}
+
+G.FMT.17 应用于类、方法、类属性的每个注解独占一行
+【级别】 建议
+【描述】
+应用于类、方法（含构造方法）、类属性的注解应在其上部，且每个注解独占一行。
+【正例】
+2.3.12 注释排版
+G.FMT.18 块注释的缩进级别应与上下文代码相同
+【级别】 建议
+【描述】
+块注释与周围代码的缩进级别相同。可以是 /* ... */ 风格或 // ... 风格。对于多行/* ... */ 注
+释，后续行应该以* 开始，并且与上一行的* 对齐。
+【正例】
+提示：编写多行注释时，如果希望自动代码格式化程序在必要时重新换行（段落样式），应使用/*
+... */ 。
+2.3.13 修饰符
+G.FMT.19 类和成员修饰符（如果存在）按Java语言规范建议的顺序显示
+【级别】 建议
+【描述】
+推荐的顺序（如果存在）：
+G.FMT.20 数字字面量应该设置合适的后缀， long 类型应该使用L作为后缀
+@Partial
+@Mock
+DataLoader loader;
+@Override
+@Nullable
+public String doSomething() { ... }
+@Override
+public int hashCode() { ... }
+/*
+* 这样是
+* 可以的
+*/
+// 这样也
+// 是可以的
+public protected private abstract default static final transient volatile synchronized
+native strictfp
+
+【级别】 建议
+【描述】
+对于long 、float 、double 类型的数字要使用合理的后缀指定数值的类型。Java 10增加了局部类型
+推断LVTI，一些字面量如果不加后缀，类型推断时可能与预期不符。为了形成良好的习惯，写出更健壮
+的代码，应参考LVTI的Style Guidelines。如果不加后缀，数值推断为int ， float 可能会推断为
+double 。因此，应该在字面量后面加上后缀。
+long 值必须使用L 后缀，禁止使用l （以避免与数字1混淆）。例如，使用3000000000L 而不是
+3000000000l 。对于较大数值，可以使用Java 7新增的数字下划线分隔符，增强代码的可读性，如
+30_000_000_000L 。
+d、f后缀不易引起混淆的，不强制采用大写字母。
+【反例】
+【正例】
+3 编程实践
+3.1 声明和初始化
+G.DCL.01 每行声明一个变量
+【级别】 要求
+【描述】
+每行的变量声明（类属性或局部变量）都只声明一个变量。
+【反例】
+【例外】
+byte flags = 0; // 符合
+short mask = 0x7fff; // 符合
+// 危险: 如下两个声明的变量被推断为int
+var flags = 0;
+var mask = 0x7fff;
+static final float INITIAL = 3.0f; // 符合
+double amount = INITIAL; // 符合
+var amount = INITIAL; // 不符合: 推断为float
+var idx = 0; // 符合
+long sum = 0L; // 符合
+var sum = 0L; // 符合。若不加后缀则会推断为int
+var isReady = true; // 符合: boolean
+var chr = '\ufffd'; // 符合: char
+var str = "wombat"; // 符合: String
+var flt = 1.0f; // 符合: float
+var dbl = 2.0d; // 符合: double
+int length, result;
+
+for 语句中第1部分通常用于计数器的初始化，可以接受多个变量声明 。
+G.DCL.02 局部变量被声明在接近它们首次使用的行
+【级别】 建议
+【描述】
+将局部变量声明在接近它们首次被使用的点，以最小化局部变量的范围。
+局部变量通常在声明时初始化，或在声明后立即被初始化，无需在声明时为局部变量设置无效的null
+值。
+类的成员变量要集中声明。
+【正例】
+G.DCL.03 禁止C风格的数组声明
+【级别】 要求
+【描述】
+数组类型由数据元素类型紧跟中括号（[]）组成，数组声明格式应该是String[] nonEmptyArray ，而
+不是String nonEmptyArray[] 。
+数组初始化的排版可以有三种写法：
+1. 变量、类型、成员都在一行容纳下的：
+2. 类型与成员分成不同行但成员一行容纳下的:
+3. 类型与成员分成不同行但成员一行容纳不下的:
+G.DCL.04 避免枚举常量序号的产生依赖于ordinal()方法
+public void doSomething() {
+...
+String value; // 不必为value设置初始值null
+if (condition()) {
+value = "value1";
+} else {
+value = "value2";
+}
+...
+boolean isLocked = lock.tryLock(); // isLocked变量在使用时进行声明，并赋初始值
+...
+}
+String[] nonEmptyArray = {"these", "can", "change"};
+new int[] {
+0, 1, 2, 3
+}
+new int[] {
+0, 1, 10,
+2, 3, 20
+}
+
+【级别】 建议
+【描述】
+Java枚举类型通过ordinal() 方法返回枚举常量的排列序号。默认情况下，序号是根据声明顺序从0开
+始累加，但某些情况下会希望指定某些枚举常量为某个固定值以代表特殊意义（例如，键盘某个按键的
+具体编码），返回该固定值的方法不应基于ordinal() 方法来实现。
+【反例】
+以下实现在新增枚举常量时可能会导致原有枚举常量的值发生变化
+【正例】
+重写枚举的构造方法，显式指定固定值。
+G.DCL.05 禁止将mutable对象定义为常量
+【级别】 要求
+【描述】
+使用public static final的意图是定义一个常量。如果用其修饰一个mutable（可变）对象，极易产生不
+当使用，造成功能异常。
+【反例】
+enum Keyboard {
+MOUSE_KEY_LEFT,
+MOUSE_KEY_RIGHT,
+MOUSE_KEY_CANCEL,
+MOUSE_KEY_MIDDLE;
+public int getMouseKeyValue() {
+return ordinal() + 1;
+}
+}
+enum Keyboard {
+MOUSE_KEY_LEFT(1),
+MOUSE_KEY_RIGHT(2),
+MOUSE_KEY_CANCEL(4),
+MOUSE_KEY_MIDDLE(8);
+private final int mouseKeyValue;
+Keyboard(int value) {
+this.mouseKeyValue = value;
+}
+public int getMouseKeyValue() {
+return mouseKeyValue;
+}
+}
+class Result {
+private int resultCode;
+private String resultMsg;
+public Result(int resultCode, String resultMsg) {
+reset(resultCode, resultMsg);
+
+【正例】
+对于上述代码，应该将Result类修订为immutable类，杜绝形如 public void reset(int
+resultCode, String resultMsg) 这种修改属性的方法。
+特别的，对于List 、Map 等数据结构的实现类（例如ArrayList 、HashMap ）大多都是mutable类，
+因此在用于常量定义时，应该使用Collections.unmodifiableList() 、
+Collections.unmodifiableMap() 将此类mutable对象转换为immutable对象。
+另外，在Java 10及后续版本，List/Map等都提供了of() 方法，其返回的是immutable对象。
+3.2 数据类型
+3.2.1 整数
+G.TYP.01 进行数值运算时，避免整数溢出
+【级别】 建议
+【描述】
+在进行数值运算过程中，确保运算结果在特定的整数类型的数据范围内，避免溢出，导致非预期的结
+果。
+}
+public void reset(int resultCode, String resultMsg) {
+this.resultCode = resultCode;
+this.resultMsg = resultMsg;
+}
+}
+// Result是一个mutable类，实例出来的SUCCESS即便用了public static final修饰，也仍是mutable对象。
+public static final Result SUCCESS = new Result(0, "Success");
+public void foo() {
+SUCCESS.reset(101, "Failure"); // 不当使用：此时，SUCCESS这个“常量”已经被改变
+// 后续代码再引用SUCCESS将带来业务异常
+if (bar() == SUCCESS) {
+...
+}
+}
+// 不符合
+public static final List<String> EMPTY_RESULT_SET = new ArrayList<>();
+// 符合: 使用了Collections.unmodifiableList()以保证EMPTY_RESULT_SET不可变
+public static final List<String> EMPTY_RESULT_SET =
+Collections.unmodifiableList(new ArrayList<>());
+// 更自然的写法：Collections.emptyList()
+public static final List<String> EMPTY_RESULT_SET = Collections.emptyList();
+public static final List<Integer> PRIME_NUMS = List.of(2, 3, 5, 7, 11, 13, 17, 19);
+// List.of, Set.of, Map.of
+
+内置的整数运算符不会以任何方式来标识运算结果的上溢或下溢。常见的加、减、乘、除都可能会导致
+整数溢出。另外，Java数据类型的合法取值范围是不对称的（最小值的绝对值比最大值大1），所以对
+最小值取绝对值（ java.lang.Math.abs() ）时，也会导致溢出。
+对于整数溢出问题，可以通过先决条件检测、使用Math类的安全方法、向上类型转换或者使用
+BigInteger 等方法进行规避。
+【反例】
+上面的示例中，乘法运算可能会产生溢出，导致最终计算结果不正确。
+【正例】
+G.TYP.02 确保除法运算和模运算中的除数不为0
+【级别】 要求
+【描述】
+如果除法或模运算中的除数为零可能会导致程序终止或拒绝服务（DoS），因此需要在运算前保证除数
+不为0。
+【反例】
+上面的示例中，没有对除数进行非零判断，会导致程序运行错误。
+【正例】
+上述示例中，对除数进行非零判断，然后再进行处理。
+3.2.2 浮点数
+G.TYP.03 禁止使用浮点数作为循环计数器
+【级别】 要求
+【描述】
+public static int multNum(int num1, int num2) {
+return num1 * num2;
+}
+public static int multNum(int num1, int num2) {
+return Math.multiplyExact(num1, num2);
+}
+long dividendNum = 0;
+long divisorNum = 0;
+long result1 = dividendNum / divisorNum;
+long result2 = dividendNum % divisorNum;
+long dividendNum = 0;
+long divisorNum = 0;
+if (divisorNum != 0) {
+long result1 = dividendNum / divisorNum;
+long result2 = dividendNum % divisorNum;
+}
+
+浮点数禁止作为循环计数器，精度问题会导致条件判断结果不准确，如(float) 2000000000 ==
+2000000050 结果为true，如下代码中的循环体不会被执行：
+G.TYP.04 需要精确计算时使用BigDecimal，不要使用float和double
+【级别】 要求
+【描述】
+浮点数在一个范围很广的值域上提供了很好的近似，但是它不能产生精确的结果。二进制浮点数对于精
+确计算是非常不适合的，因为它不可能将0.1，或者10的其它任何负次幂表示为一个长度有限的二进制
+小数。涉及精确的数值计算（货币、金融等），建议使用int 、long 、 BigDecimal 等；在构造
+BigDecimal 时，使用浮点数容易导致精度损失，应该使用字符串格式的数值构造BigDecimal ，即应
+该用BigDecimal (String val) ，而不是BigDecimal (double val) 。
+【反例】
+以上代码的输出结果是0.6100000000000001。
+【正例】（精确计算）
+以上代码的输出结果是0.61。
+G.TYP.05 浮点型数据判断相等不能直接使用==，浮点型包装类型不要用
+equals() 或者flt.compareTo(another) == 0 作相等的比较
+【级别】 要求
+【描述】
+与0.0f 或0.0d 作算术比较是允许的。建议浮点型数据比较使用Float 或Double 的compare (f1,
+f2) 方法，或BigDecimal 。
+由于浮点数在计算机表示中存在精度的问题，因此，判断两个浮点数相等不能直接使用等号，可以采用
+如下正例的方式。
+【反例】
+for (float flt = (float) 2000000000; flt < 2000000050; flt++) {
+...
+}
+System.out.println(1.03d - 0.42d);
+BigDecimal income = new BigDecimal("1.03");
+BigDecimal expense = new BigDecimal("0.42");
+System.out.println(income.subtract(expense));
+
+【正例】
+如下示例中，EPSILON常量为1e-6f 是一个极小值，实际使用时应根据情况判断精度。如果是
+double ，应使用1e-6d 。
+Float 或Double 包装类型可由BigDecimal 代替做运算操作。
+G.TYP.06 禁止尝试与NaN进行比较运算，相等操作使用Double或Float的
+isNaN() 方法
+【级别】 要求
+【描述】
+NaN（Not a Number，非数值）是无序的，当一个或两个操作数是NaN时，数值比较符<、<=、>、>=
+会返回false。当任意一个操作数是NaN，==运算符会返回false，!=运算符会返回true。因为无序的特
+性常常会导致意外结果，所以不能直接与NaN进行比较。
+【反例】
+上面的示例中，与NaN进行直接比较。根据NaN的语义，所有与NaN的比较会返回false（除了!=会返回
+true）。因此，代码中的比较运算结果只会返回false，不会输出“result is NaN”。
+【正例】
+float f1 = 1.0f - 0.9f;
+float f2 = 0.9f - 0.8f;
+if (f1 == f2) {
+// 预期进入此代码块，执行其它业务逻辑
+// 但事实上 fl == f2 的结果为 false
+}
+Float flt1 = Float.valueOf(f1);
+Float flt2 = Float.valueOf(f2);
+if (flt1.equals(flt2)) {
+// 预期进入此代码块，执行其它业务逻辑
+// 但事实上 equals 的结果为 false
+}
+private static final float EPSILON = 1e-6f;
+float foo = ...;
+float bar = ...;
+if (Math.abs(foo - bar) < EPSILON) {
+...
+}
+public class NanComparison {
+public static void main(String[] args) {
+double num = 0.0d;
+double result = Math.cos(1 / num); // 如果输入是infinity则Math.cos()返回 NaN
+if (result == Double.NaN) { // 相等比较总是false!
+System.out.println("result is NaN");
+}
+...
+}
+}
+
+上述代码中使用Double.isNaN()方法来检查result是否为NaN，可以获得正确的结果。
