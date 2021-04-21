@@ -1,0 +1,898 @@
+
+3.5.2 方法参数与返回值
+G.MET.03 不应把方法的参数当做临时变量
+【级别】 建议
+【描述】
+每个变量/参数都有自己独特的功用，让一个变量承担多个职责，变量名将无法清晰表达其功能，会使
+程序难以理解。
+为减轻因疏忽导致的再次对参数赋值，可在参数前加final关键字。
+【反例】
+方法参数作为临时变量，程序难以理解；
+【正例】
+int foo(Item msg) {
+if (!isReceived) {
+return -1;
+}
+type = getMsgType(msg);
+if (type == UNKNOWN) {
+return -1;
+}
+return dealMsg(...);
+}
+List<JLabel> widgets = List.of(new JLabel());
+int sum = 0;
+for (JLabel lb : widgets) {
+if (lb.getBackground() == RED) {
+int width = lb.getWidth();
+sum += width;
+}
+}
+int sample(int inputVal) {
+inputVal = inputVal * currentMultiplier(inputVal);
+inputVal = inputVal * currentAdder(inputVal);
+return inputVal;
+}
+
+方法参数命名与业务逻辑相匹配，参数功能单一，代码逻辑清晰。
+【例外】
+对引用类型的参数，允许修改其引用对象的内部属性（例如调用其set方法对属性进行修改）。
+G.MET.04 谨慎使用可变数量参数的方法
+【级别】 建议
+【描述】
+在Java 5版本中初次引入Varargs（variable number of arguments）可变数量参数，可以接受指定类
+型的零个到多个参数。不建议使用Varargs重写使用一个固定长度数组作为参数的方法，而应该在确实
+需要操作可变长度的值的序列时使用。
+G.MET.05 对于返回数组或者容器的方法，应返回长度为0的数组或者容器，代替
+返回null
+【级别】 建议
+【描述】
+在方法返回值中，用长度为0的数组或者容器，来代替返回null，则上层调用代码在使用此返回的数组或
+者容器前，无需再判断是否为空，业务逻辑一气呵成，代码更简洁。
+同时，也避免了程序员因为忘记了对返回值进行空指针检查，而导致的NullPointerException 。
+方法的返回值可以为null时，应该添加注释充分说明什么情况下会返回null值。
+【反例】
+被调用方法在发现参数不满足要求时，返回null给外层调用者。外层调用者必须时刻记得检查返回值是
+否为null，否则会发生异常。而且添加了检查代码后，代码臃肿。
+int sample(final int basicSalary) { // 使用final能够帮助判断，避免意外修改
+int performanced = basicSalary * currentMultiplier(basicSalary);
+int bonused = performanced * currentAdder(performanced);
+...
+return bonused;
+}
+public static List<String> decorate(String[] personDescs) {
+if (personDescs == null || personDescs.length == 0) {
+return null;
+}
+List<String> personNames = new ArrayList<>(personDescs.length);
+for (String personDesc : personDescs) {
+String personName = getPersonName(personDesc);
+personNames.add(personName);
+}
+return personNames;
+}
+public static void main(String[] args) {
+...
+List<String> personNames = decorate(personDescs);
+if (personNames == null) {
+return;
+}
+
+【正例】
+被调用方法在发现参数不满足要求时，返回空容器给外层调用者。外层调用无需检查返回值是否为
+null，一套代码解决问题。
+【例外】
+有些不得不override的方法，返回null时可以不加注释。
+已经用@Nullable等注解为可空的，返回null时可以不加注释。
+G.MET.06 Java 8使用Optional 代替null作为返回值或者可能的缺失值；禁止对
+Optional 对象赋值为null
+【级别】 建议
+【描述】
+Optional 可以表示两种情形：一种是存在值，一种是缺失值。例如Optional<String> email ，可以
+表示email是有或无值的。Optional 常见的使用场景在集合库，例如Map<Integer,
+Optional<String>> idEmails ，表示有的ID对应的Email是可选存在的。
+Optional在现代编程语言Scala、Rust、Swift中都已经被支持了，是标准的nullable值的处理方式，它
+的好处有：避免空指针异常，减少频繁地嵌套式判空处理，让业务逻辑更直观。
+Optional是value-based class，java.time包中许多类也是。value-based类特意实现了equals 、
+hashCode 和toString 方法，这些实现仅根据实例本身的状态进行计算而不是实例的标识或任何其他
+对象或变量的状态，推荐用equals 而不是==做相等比较。值类型，未来版本称为inline type， 它们是
+final、small、immutable、identity-less types，JVM会做性能优化。
+Optional 的使用场景是尽可能减少null的直接使用，包括RPC调用、缓存和数据库查询等可能返回缺
+失的情形。如果API作者强烈要求调用者关注结果可能为null，需要精心处理，那么方法应该返回
+Optional<T> 。
+禁止对Optional对象赋值/返回为null，或与null比较，例如: Optional<Foo> foo = null;
+for (String personName : personNames) {
+...
+}
+}
+public static List<String> decorate(String[] personDescs) {
+if (personDescs == null || personDescs.length == 0) {
+return Collections.emptyList();
+}
+List<String> personNames = new ArrayList<>(personDescs.length);
+for (String personDesc : personDescs) {
+String personName = getPersonName(personDesc);
+personNames.add(personName);
+}
+return personNames;
+}
+public static void main(String[] args) {
+// personDescs.length为0
+List<String> personNames = decorate(personDescs);
+for (String personName : personNames) {
+...
+}
+}
+
+不应该返回Optional<Integer> 、Optional<Long> 、Optional<Double> ，而应该使用
+OptionalInt 、OptionalLong 、OptionalDouble
+如果文档注释明确返回值是用于数值计算密集型、或者用于序列化，那么可以返回T或者null，无
+需Optional<T>
+一般不应该返回Optional<集合或数组> ，而用空集合或空数组替代
+例如，以下optionalExample() 方法展示了Optional 的典型用法：
+3.6 类、接口与面向对象编程
+3.6.1 类
+Java 8可使用Lambda表达式或方法引用代替匿名类。
+在设计class时，要为class及其成员设置最小的可访问性。
+G.OBJ.01 应避免public且非final的成员变量定义
+【级别】 建议
+【描述】
+将成员变量设置为私有（private）的理由是：不希望类的外部代码依赖这个变量，依赖类内部的实现细
+节。这样，当内部实现需要变更时，影响面就比较小，变更的成本就比较低。不应该使用系统属性
+（System.setProperties/System.getProperties）来配置和传递信息。这种一般也不常见，但如果发
+生，很难察觉。
+G.OBJ.02 不要在父类的构造方法中调用可能被子类覆写的方法
+【级别】 要求
+【描述】
+当在父类的构造方法中调用可能被子类覆写的方法时，构造方法的表现是不可预知的，很可能会导致异
+常。而问题出现后，往往难以快速定位。
+这是由于在Java中，当子类初始化时，会调用父类的构造方法，当父类构造方法调用了被子类覆写的方
+法，往往会由于子类的初始化未完成而导致异常。
+【反例】
+Optional<Image> filter(Image bitmap) {
+return Optional.of(bitmap);
+}
+Optional<Image> scale(Image bitmap) {
+return Optional.of(bitmap);
+}
+public void optionalExample(String path, ImageView view) {
+Optional<Image> maybeBitmap = readFromFile(path);
+maybeBitmap.flatMap(bitmap -> filter(bitmap)).flatMap(bitmap -> scale(bitmap))
+.ifPresent(bitmap -> view.setImage(bitmap));
+}
+Optional<Image> readFromFile(String path) {
+return Optional.empty();
+}
+
+G.OBJ.03 构造方法如果有多个，尽量重用
+【级别】 建议
+【描述】
+如果有多个构造方法，参数较少的，可以重用参数更多的构造方法。
+经典的例子来自于Java的Thread：
+G.OBJ.04 避免在无关的变量或无关的概念之间重用名字，避免隐藏（hide）、遮
+蔽（shadow）和遮掩（obscure）
+【级别】 要求
+【描述】
+在声明子类的属性、方法或嵌套类型时，除了覆写（override）、重载（overload）之外，要尽量避免
+重名导致的隐藏（hide）、遮蔽（shadow）和遮掩（obscure）。
+这些名字重用的术语定义如下：
+覆写（override）------子类与父类间
+一个类的实例方法可以覆写（override）在其超类中可访问到（非private）的具有相同签名的实例方法
+（非static），从而使能了动态分派（dynamic dispatch）；换句话说，VM将基于实例的运行期类型来
+选择要调用的覆写方法。
+public class SeniorClass {
+public SeniorClass() {
+toString(); // 如果toString()被覆写了，可能会导致异常
+}
+@Override
+public String toString() {
+return "IAmSeniorClass";
+}
+}
+public class JuniorClass extends SeniorClass {
+private String name;
+public JuniorClass() {
+super(); // 调用父类的构造方法，导致NullPointerException异常
+name = "JuniorClass";
+}
+@Override
+public String toString() {
+return name.toUpperCase();
+}
+}
+public Thread() {
+this(null, null, "Thread-" + nextThreadNum(), 0);
+}
+
+重载（overload）------类内部
+在某个类中的方法可以重载（overload）另一个方法，只要它们具有相同的名字和不同的签名。由调用
+所指定的重载方法是在编译期选定的。重载的方法应该按顺序放在一起，中间不要插入其他的方法，以
+提升代码的可读性。使重载产生歧义或混淆的场景包括：
+可变参数；
+包装类型，例如参数分别是int与Integer。
+以上场景，不应该使用重载，应该修改方法名，如果是构造方法，则委托到不同名的静态方法。
+隐藏（hide）------子类与父类间
+一个类的属性、静态方法或内部类可以分别隐藏（hide）在其超类中可访问到的具有相同名字（对方法
+而言就是相同的方法签名）的所有属性、静态方法或内部类。上述成员被隐藏后，将阻止其被继承：
+class Base {
+public void fn() {
+...
+}
+}
+class Derived extends Base {
+@Override
+public void fn() { // 覆写Base.fn()
+...
+}
+}
+class CircuitBreaker {
+public void fn(int it) {}
+public void fn(String str) {}
+}
+class Swan {
+protected String name = "Swan";
+public static void fly() {
+System.out.println("swan can fly ...");
+}
+}
+class UglyDuck extends Swan {
+protected String name = "UglyDuck";
+public static void fly() { // 隐藏Swan.fly
+System.out.println("ugly duck can't fly ...");
+}
+}
+public class TestFly {
+public static void main(String[] args) {
+Swan swan = new Swan();
+Swan uglyDuck = new UglyDuck();
+swan.fly(); // 打印swan can fly ...
+uglyDuck.fly(); // 还是打印swan can fly ...，hide让人以为是覆写了，其实不是
+System.out.println(swan.name); // 打印 Swan
+System.out.println(uglyDuck.name); // 打印 Swan
+}
+
+遮蔽（shadow）------类内部
+一个变量、方法或类可以分别遮蔽（shadow）在类内部具有相同名字的变量、方法或类。如果一个实
+体被遮蔽了，那么就无法用简单名引用到它：
+【反例】
+方法的局部变量遮蔽了类的静态变量
+遮掩（obscure）------类内部
+一个变量可以遮掩具有相同名字的一个类，只要它们都在同一个范围内：如果这个名字被用于变量与类
+都被许可的范围，那么它将引用到变量上。相似地，一个变量或一个类型可以遮掩一个包。
+遮掩是唯一一种两个名字位于不同的名字空间的名字重用形式，这些名字空间包括：变量、包、方法或
+类型。如果一个类或一个包被遮掩了，那么不能通过其简单名引用到它。
+遵守命名习惯可以极大地消除产生遮掩的可能性。
+【反例】（变量命名也违反了小驼峰命名的规则）
+G.OBJ.05 避免基本类型与其包装类型的同名重载方法
+【级别】 建议
+【描述】
+有歧义的重载或者误导性的重载，会导致非预期的结果。
+方法与构造方法的重载特性允许声明名字相同、参数不同的方法或构造方法。编译器在每次调用时都会
+去探查与调用参数相匹配的方法。但在自动装箱和泛型场景下，可能会导致各个重载方法之间的边界变
+得模糊。此外，有些方法或构造方法的重载方法在参数类型上完全一样，不同的仅仅是参数的顺序，
+Java编译器不会对这种重载方式报任何异常。如果程序员在调用方法前不仔细看API文档的话，就很容
+易出错。
+【反例】
+}
+public class WhoKnows {
+static String sentence = "I don't know.";
+public static void main(String[] args) {
+String sentence = "I know!"; // 遮蔽了类的静态成员sentence
+System.out.println(sentence); // 打印的是I know！
+}
+}
+public class Obscure {
+static String System; // 遮掩java.lang.System
+public static void main(String[] args) {
+// 下面这行无法编译: System引用到static属性
+System.out.println("hello, obscure world!");
+}
+}
+class SomeResource {
+HashMap<Integer, Integer> hm = ...;
+public SomeResource(int id, String name) {
+// 初始化序列 #1
+
+【正例】
+G.OBJ.06 覆写equals方法时，同时覆写hashCode方法
+【级别】 要求
+【描述】
+因为Java对象在存放到基于Hash的集合（如HashMap 、HashTable 等）时，会使用其Hash码进行索
+引，如果只覆写了equals 方法，而没有正确覆写hashCode 方法，则会导致效率低下甚至出错；Java
+对象的hashCode 方法有如下约定：
+1. 同一次运行中，同一个对象如果equals 方法中用到的信息没有改变，多次调用其hashCode 方法
+返回值必须相同；
+2. 如果对两个对象调用equals 方法时相等，则这两个对象的hashCode 方法，也必须返回相同的
+值；
+}
+public SomeResource(String name, int id) {
+// 初始化序列 #2
+}
+public SomeResource(Integer id, String name) {
+// 初始化序列 #3
+}
+public String getData(Integer id) { // 重载序列 #1
+String str = hm.get(it).toString(); // 获取一个特定的记录
+return str + SUFFIX;
+}
+public Integer getData(int id) { // 重载序列 #2
+return hm.get(it); // 获取在位置it的记录
+}
+}
+class SomeResource {
+HashMap<Integer, Integer> hm = ...;
+public static Employee createSomeResource1(int id, String name) {
+// 初始化序列 #1
+}
+public static Employee createSomeResource2(String name, int id) {
+// 初始化序列 #2
+}
+public static Employee createSomeResource3(Integer id, String name) {
+// 初始化序列 #3
+}
+public Integer getDataByIndex(int id) {
+// 非重载
+}
+public String getDataByValue(Integer id) {
+// 非重载
+}
+}
+
+3. 如果对两个对象调用equals 方法时不相等，则对这两个对象的hashCode 方法，不要求其返回值
+不同，但是出于减少哈希碰撞的性能考虑，最好能不同。
+【反例】
+覆写equals 方法的时候，没有同时覆写hashCode 方法
+G.OBJ.07 子类覆写父类方法或实现接口时必须加上@Override注解
+【级别】 要求
+【描述】
+加上@Override注解的好处是，如果覆写时因为疏忽，导致子类方法的参数同父类不一致，编译时会报
+错，使问题在编译期就被发现；如果父类修改了方法定义造成子类不再覆写父类方法，也能使问题在编
+译期尽早被发现。
+G.OBJ.08 正确实现单例模式
+【级别】 建议
+【描述】
+单例模式（Singleton Pattern）属于创建型模式，它确保在同一个进程内，单例类只有一个对象，并且
+该对象对所有其他对象提供访问，常见的如Windows系统下的资源管理器、Spring Bean等都会采用这
+种方式。
+一般来说，正确实现单例有如下几点要求：
+将其构造方法设为私有
+防止对象在初始化被多个线程同时运行
+确保该对象不可序列化
+确保该对象无法克隆
+【反例】
+非私有构造方法
+public class Entity {
+private String id;
+private String value;
+@Override
+public boolean equals(Object obj) {
+if (obj instanceof Entity) {
+Entity that = (Entity) obj;
+return Objects.equals(this.id, that.id)
+&& Objects.equals(this.value, that.value);
+}
+return false;
+}
+}
+class UntrustedSingletonDemo1 {
+private static UntrustedSingletonDemo1 instance;
+protected UntrustedSingletonDemo1() {
+instance = new UntrustedSingletonDemo1();
+}
+}
+
+无法防止并发调用的场景
+可以通过反序列化来构造多个实例
+可以通过调用clone方法获得新的实例
+【正例】
+利用枚举实现单例
+class UntrustedSingletonDemo2 {
+private static UntrustedSingletonDemo2 instance;
+private UntrustedSingletonDemo2() {
+}
+public static UntrustedSingletonDemo2 getInstance() {
+if (instance == null) {
+instance = new UntrustedSingletonDemo2();
+}
+return instance;
+}
+public static UntrustedSingletonDemo2 getInstance2() {
+if (instance == null) {
+synchronized (UntrustedSingletonDemo2.class) {
+instance = new UntrustedSingletonDemo2();
+}
+}
+return instance;
+}
+}
+class UntrustedSingletonDemo3 implements Serializable {
+private static final long serialVersionUID = 6825273283542226860L;
+private static UntrustedSingletonDemo3 instance;
+private UntrustedSingletonDemo3() {
+}
+public static synchronized UntrustedSingletonDemo3 getInstance() {
+if (instance == null) {
+instance = new UntrustedSingletonDemo3();
+}
+return instance;
+}
+}
+class UntrustedSingletonDemo4 implements Cloneable {
+private static UntrustedSingletonDemo4 instance;
+private UntrustedSingletonDemo4() {
+}
+public static synchronized UntrustedSingletonDemo4 getInstance() {
+if (instance == null) {
+instance = new UntrustedSingletonDemo4();
+}
+return instance;
+}
+}
+
+利用静态内部类实现单例
+利用Spring的依赖注入能力实现单例（其他诸如Guice、Dagger等也可以实现）
+除上述三种方式外，还可以利用双重检查锁实现单例模式，可参考避免使用不正确形式的双重检查锁。
+G.OBJ.09 使用类名调用静态方法，而不要使用实例或表达式来调用
+【级别】 要求
+【描述】
+明确地使用类名调用静态方法不容易造成混淆。使用实例调用静态方法时，调用的静态方法是声明类型
+的静态方法，与实例的实际类型无关，可能会导致与预期的结果不一致。当父类和子类有同名静态方法
+时，声明父类变量引用子类实例，使用该实例调用同名的静态方法调用的是父类的静态方法，而非子类
+的静态方法。类的静态属性也要使用类名进行调用。
+【反例】
+两次调用的都是Dog.bark()方法，输出2行woof
+enum RecommandSingleton1 {
+SINGLETON;
+public void doSomething() {
+}
+}
+final class RecommandSingleton2 {
+private static class SingletonHolder {
+static final RecommandSingleton2 INSTANCE = new RecommandSingleton2();
+}
+private RecommandSingleton2() {
+}
+public static RecommandSingleton2 getInstance() {
+return SingletonHolder.INSTANCE;
+}
+}
+@Component
+class RecommandSingleton3 {
+public void doSomething() {
+}
+}
+@Component
+class SomeServiceImpl {
+private final RecommandSingleton3 singleton;
+@Autowired
+public SomeServiceImpl(RecommandSingleton3 singleton) {
+this.singleton = singleton;
+}
+}
+class Dog {
+public static void bark() {
+System.out.println("woof");
+
+【正例】（用类名来调用静态方法）
+3.6.2 接口
+G.OBJ.10 接口定义中去掉多余的修饰词
+【级别】 建议
+【描述】
+在接口定义中，属性已缺省具有public static final修饰词，方法已缺省具有public abstract修饰词。因
+此在代码中不要再次提供这些修饰词。
+G.OBJ.11 Java 8中可在接口中加上静态方法表示相关的工厂或助手方法
+【级别】 建议
+【描述】
+推荐在接口中添加静态方法表示相关的工厂或助手方法，这样不需要在“接口名字 + s”的工具类/助手类
+中放置各种静态方法了。例如可以把Collections的方法放到Collection接口里面。
+3.7 异常处理
+}
+}
+class Basenji extends Dog {
+public static void bark() {
+System.out.println("miao");
+}
+}
+public class Bark {
+public static void main(String[] args) {
+Dog woofer = new Dog();
+Dog nipper = new Basenji();
+woofer.bark();
+nipper.bark();
+}
+}
+class Dog {
+public static void bark() {
+System.out.print("woof");
+}
+}
+class Basenji extends Dog {
+public static void bark() {
+System.out.println("miao");
+}
+}
+public class Bark {
+public static void main(String[] args) {
+Dog.bark();
+Basenji.bark();
+}
+}
+
+对可容错处理的情况使用受检异常（checked exception），对编程错误使用运行时异常（runtime
+exception）。
+对于可通过预检查方式规避的运行时异常，不应该通过try catch机制进行处理，如
+NullPointerException 、IndexOutOfBoundsException 等。
+只针对真正异常的情况才使用exception机制，异常机制不应用来做流程控制和条件控制。
+在抛出异常的细节信息中，应包含详细的诊断信息。
+使用异常来做业务逻辑错误处理，而非错误码。
+G.ERR.01 不要通过一个空的catch块忽略异常
+【级别】 要求
+【描述】
+通过一个空的catch块可以很方便地忽略异常，如下所示：
+空的catch块会使异常达不到应有的目的。忽略异常就如同忽略火警信号一样，若把火警信号器关掉
+了，当真正火灾发生时，就没有人能看到火警信号了。
+对于某些异常可被忽略特殊场景下，例如在finally代码段中关闭FileInputStream 时，可以忽略异
+常，因为此时并没有改变文件状态，不必执行任何恢复动作。为了表明忽略这类异常是经过深思熟虑
+的，可采用如下措施：
+在catch块中添加注释，解释为什么可以忽略这个异常；
+对于那些不应该频繁发生的异常，应该将异常信息记录到日志中；
+对于被忽略的异常，建议将被忽略的Exception命名为ignored。
+G.ERR.02 不要直接捕获受检异常的基类Exception
+【级别】 建议
+【描述】
+捕获受检异常的目的是为了进行恢复，而如果不加区分的捕获所有受检异常，则无法进行对应异常的恢
+复处理。因此，应该区分并捕获具体的异常。捕获时，列出多种具体异常，如果用同一个处理逻辑，应
+该用并语法(ExceptionType1 | ... | ExceptionTypeN 变量) 来减少重复代码。
+Java 7允许将catch子句组合成一个代码块，而无需使用危险的catch-all子句或复制整个代码块。
+【正例】
+【例外】
+1.编码过程中遇到了第三方api直接抛出Exception 异常，代码中需要使用catch (Exception ex) 。
+2.在框架中属于“公共服务”性质的“兜底”处理，例如事件循环。
+try {
+...
+} catch (SomeException ex) {
+}
+catch (ParseException | IOException exception) {
+// 处理异常
+}
+
+G.ERR.03 不要直接捕获可通过预检查进行消除的RuntimeException ，如
+NullPointerException 、IndexOutOfBoundsException 等
+【级别】 建议
+【描述】
+可通过预检查的方式进行消除的RuntimeException ，这类异常一般表示程序逻辑错误，不应该通过
+try...catch的方式进行处理（这也可能会影响代码的可读性及系统的运行效率）。推荐通过预检查方式
+进行消除，该类运行期异常包括： NullPointerException 、IndexOutOfBoundsException 等。对
+于NumberFormatException、IllegalArgumentException、IllegalStateException等可通过try...catch
+方式处理。
+【反例】
+上述示例中， validateUntrustInput() 方法对数据进行校验时，没有主动判断参数是否为null，而是
+通过捕获NullPointerException 的方式处理。
+【正例】（代码中显式判空）
+上述示例中， validateUntrustInput() 方法中明确检查了参数是否为null，而不是通过捕获
+NullPointerException 进行处理。
+【例外】
+对于调用开源三方件，三方件中抛出NullPointerException 、IndexOutOfBoundsException 时，
+可以通过try...catch方式进行处理。
+G.ERR.04 防止通过异常泄露敏感信息
+【级别】 要求
+【描述】
+public boolean validateUntrustInput(String paramValue) {
+try {
+if (paramValue.length() < 6 || paramValue.length() > 20) {
+return false;
+}
+...
+return true;
+} catch (NullPointerException ex) {
+return false;
+}
+}
+public boolean validateUntrustInput(String paramValue) {
+if (paramValue == null) {
+return false;
+}
+if (paramValue.length() < 6 || paramValue.length() > 20) {
+return false;
+}
+...
+return true;
+}
+
+在程序输出异常信息的时候需要对输出内容进行处理，将敏感信息进行过滤，避免攻击者通过构造恶意
+输入参数挖掘程序内部逻辑。避免将异常中的敏感信息传递给用户，对于抛出异常的场景尽量及时处
+理。附录C 敏感异常列出了一些常见的需要注意的Java原生异常类型，除此之外，三方件也可能会抛出
+携带敏感信息的异常，如JSONException 等。
+【反例】（异常消息和类型泄露敏感信息）
+上述示例代码中，当请求的文件不存在时， FileInputStream 的构造器会抛出
+FileNotFoundException 或IOException 异常。攻击者可以不断传入错误的文件来重现出底层文件系
+统结构。
+此示例抛出的异常中泄露的有用信息较少，但是它仍然会透露出指定的文件不可读。
+【正例】
+通过设置指定根目录，规定用户只能打开指定目录下面的文件，避免攻击者获取其他目录下文件信息。
+【正例】
+public static void getFile(String filePath) throws FileNotFoundException {
+FileInputStream fileInputStream = new FileInputStream(filePath);
+}
+public static void getFile(String filePath) throws IOException {
+try {
+FileInputStream fileInputStream = new FileInputStream(filePath);
+} catch (FileNotFoundException ex) {
+throw new IOException("Unable to retrieve file.", e);
+}
+}
+public static void getFile(String filePath) throws SecurityException {
+try {
+FileInputStream fileInputStream = new FileInputStream(filePath);
+} catch (FileNotFoundException ex) {
+// 在日志中记录异常
+throw new SecurityException();
+}
+}
+// filePath、directory已经规范化处理
+public static void getFile(String filePath, String directory) {
+if (!filePath.startsWith(directory)) {
+LOGGER.error("Invalid file");
+return;
+}
+try {
+FileInputStream fileInputStream = new FileInputStream(filePath);
+} catch (FileNotFoundException ex) {
+LOGGER.error("Invalid file");
+return;
+}
+}
+// filePath、filePathList已经规范化处理
+public static void getFile4(String filePath, List<String> filePathList) {
+if (!filePathList.contains(filePath)) {
+LOGGER.error("Invalid file");
+
+通过设置可访问文件白名单，避免泄露异常信息。
+【例外】
+对出于问题定位目的，可将敏感异常信息记录到日志中，在保证足以定位问题的情况下进行脱敏处理，
+同时必须做好日志的访问控制，防止日志被任意访问，导致敏感信息泄露给非授权用户。
+G.ERR.05 方法抛出的异常，应该与本身的抽象层次相对应
+【级别】 要求
+【描述】
+当方法把一个异常传给调用方时，应确保异常的抽象层次与方法的抽象层次是一致的。定义异常时应该
+区分checked/runtime异常，避免直接抛出RuntimeException ，更不应该直接抛出Exception 或
+Throwable 。
+【反例】
+getTaxId 把更底层的RuntimeException 返回给调用方，使调用方代码与底层耦合起来。
+推荐：抛出EmployeeDataNotAvailable 异常，抽象层次与方法一致
+G.ERR.06 在catch块中抛出新异常时，避免丢失原始异常信息
+【级别】 建议
+【描述】
+在catch代码块中更改异常类型时，如果只是使用原始异常中的
+message（ originalException.getMessage() ）或新的错误描述构造新异常，可能会导致原始异常
+中的有价值的信息丢失，例如异常类型、调用堆栈等信息，增加问题定位的难度。
+原始异常含敏感信息时，可先对敏感信息进行匿名化处理。
+【反例】
+return;
+}
+try {
+FileInputStream fileInputStream = new FileInputStream(filePath);
+} catch (FileNotFoundException ex) {
+LOGGER.error("Invalid file");
+return;
+}
+}
+public class Employee {
+...
+public TaxId getTaxId() {
+...
+throw new RuntimeException();
+}
+...
+}
+
+上述代码中，在捕获IOException 后，直接抛出了一个MyBizDomainException ，这样会导致原始的
+IOException 信息丢失。
+【正例】
+该示例代码中，在捕获IOException 后，首先将IOException 记录到日志中，然后抛出一个新的与业
+务代码相对应的异常。
+【正例】
+该示例代码中，在捕获IOException 后，基于IOException 构造了一个与业务代码相对应的异常。
+bizExceptionHandle 可根据实际情况对异常进行清理、过滤。
+【例外】
+对于异常中的堆栈本身就属于敏感信息，可在新抛出异常中的message中对原始异常进行概述。
+G.ERR.07 一个方法不应抛出超过5个异常，并在Javadoc的@throws标签中记录
+每个抛出的异常及其条件
+【级别】 建议
+【描述】
+方法抛出过多的异常，会增加客户端异常处理的工作，同时也表明方法承担了过多的职责。另外，如果
+没有为抛出的异常建立Javadoc，这样的类和接口将很难被有效使用。
+G.ERR.08 在finally块中不要使用return、break或continue使finally块非正常
+结束
+public void loadConfigFile() throws MyBizDomainException {
+...
+try {
+...
+} catch (IOException ex) {
+throw new MyBizDomainException("Lost original exception message");
+}
+}
+public void loadConfigFile() throws MyBizDomainException {
+...
+try {
+...
+} catch (IOException ex) {
+// 将原始异常记录到日志中，然后抛出新的异常
+log.warn(ex);
+throw new MyBizDomainException("my exception message");
+}
+}
+public void loadConfigFile() throws MyBizDomainException {
+...
+try {
+...
+} catch (IOException ex) {
+// 新异常中携带原始异常信息
+throw new MyBizDomainException(ex.getMessage(), bizExceptionHandle(ex));
+}
+}
+
+【级别】 要求
+【描述】
+在finally中使用return、break或continue会使finally块非正常结束，造成的影响是，即使在try块或
+catch中抛出了异常，也会因为finally非正常结束而导致异常无法抛出。finally块非正常结束会有编译告
+警。
+【反例】
+下列代码的main方法中不会捕获到异常，输出是0。
+G.ERR.09 不要调用System.exit() 终止JVM
+【级别】 建议
+【描述】
+System.exit() 会结束当前正在运行的Java虚拟机（JVM），导致拒绝服务攻击。例如，在某个web请
+求的处理逻辑中调用System.exit() ，会导致web容器停止运行。系统中应避免无意和恶意地调用
+System.exit() 。
+【反例】
+上面的示例代码中，使用System.exit() 来强制关闭JVM并终止运行中的进程。
+【正例】
+上述示例中， main() 方法正常退出，结束进程。
+【例外】
+在命令行应用中调用System.exit()方法是允许的。
+public static void main(String[] args) {
+try {
+System.out.println(func());
+} catch (MyException ex) {
+// 处理异常
+}
+}
+public static int func() throws MyException {
+for (int i = 1; i < 2; i++) {
+try {
+throw new MyException();
+} finally {
+continue; // 不推荐
+}
+}
+return 0;
+}
+public static void main(String[] args) {
+System.exit(1);
+LOGGER.info("exit");
+}
+public static void main(String[] args) {
+LOGGER.info("exit");
+}
+
+G.ERR.10 尽量消除非受检的异常，不应该在整个类上使用SuppressWarning
+【级别】 建议
+【描述】
+在源代码中通过@SuppressWarning("unchecked") 屏蔽告警，是个坏的实践。它丢失了类型安全和描
+述性的好处。
+然而有些Java API，是用Object obj 来存储数据对象的，当数据被取出来用时，不得不转换为用户数
+据对象。这时可能会有强制类型转换的告警，例如： [unchecked] unchecked method
+invocation 。
+非受检警告很重要，不要轻易忽略它们。应该始终在最小的范围内使用@SuppressWarning注解，一般
+是在变量声明，简短的语句或方法上。
+每当使用SuppressWarning注解时，都要添加一条注释，说明为什么这么做是安全的，及其使用的业
+务场景和范围。
+【例外】
+类的设计可优先考虑泛型，但是有些API返回的就是Object对象，调用方不得不强制转换为用户数据对
+象，例如ObjectInputStream.readObject ，Android Message.obj 等。
+3.8 并发与多线程
+使用Java标准库提供的高级同步机制在多线程中共享数据。
+针对线程安全性，需要进行文档（javadoc）说明。
+Java 8可以使用CompletableFuture编写异步任务。
+“Thinking in parallel”，Java 8可以使用stream做隐式的自动并行化，替代显式的循环。
+对多个资源、数据库表、对象同时加锁时，需要保持一致的加锁顺序，否则可能会造成死锁。
+高并发时，同步调用应该考量锁的性能损耗。能用无锁数据结构，就不要用锁；能锁区块，就不要锁整
+个方法体；能用对象锁，就不要用类锁。避免在锁代码块中调用RPC方法。
+在高并发场景中，避免使用等于判断作为中断或退出的条件，容易产生等值判断被“击穿”的情况，使用
+大于或小于的区间判断条件来代替。
+在使用阻塞等待获取锁的lock.lock() 方式中，应该在try代码块之外，并且在加锁方法与try代码块之
+间没有任何可能抛出异常的方法调用，避免加锁成功后，在finally中无法解锁。
+在使用尝试机制来获取锁的lock.tryLock() 方式中，进入业务代码块之前，应该先判断当前线程是否
+持有锁。参考如下写法：
+Lock lock = new XxxLock();
+...
+boolean isLocked = lock.tryLock();
+if (isLocked) {
+try {
+doBiz();
+} finally {
+lock.unlock();
+}
+}
+
+不推荐使用ThreadGroup ，其中很多方法已经不被推荐使用，另外部分方法本身就非线程安全，可以
+使用线程池进行替换。
+对于阻塞的网络或I/O操作的线程，要提供终止机制，防止拒绝服务风险。
+3.8.1 可见性和原子性
+P.02 避免数据竞争data race
+【描述】
+Java 5开始，Java Memory Model采用happens-before关系，来规定并发执行中，读写操作允许读到
+什么值，不允许读到什么值。两个线程分别对一个非volatile的共享变量进行访问操作，其中至少一个
+操作是写操作，且这两个操作之间没有happens-before关系，就是data race。正确同步的（correctly
+synchronized）执行是指没有data race的执行。
+通常必须避免data race。但由于Java Memory Model在有data race的情况下也有明确的语义，如果可
+以用Java Memory Model证明代码即使有data race也总能产生符合要求的结果，可以带来性能提升，
+且用完善的注释解释程序为什么是正确的，那么可以破例允许data race的存在。只有极个别情况（如
+实现对象缓存、sloppy counter、snapshot-at-the-beginning算法等）才需要使用这个特例。
+注：happens-before关系的正式定义见Java Memory Model。不熟悉happens-before关系的读者可以参
+考Oracle的The Java Tutorials: Lesson: Concurrency，其中有简明而准确的描述，且充分地强调了
+happens-before关系的重要性。
+Java Memory Model诞生的背景是，由于CPU的乱序执行以及编译器的变换，一个线程访问内存的实际
+顺序会被CPU和编译器打乱，因此多个线程并发访问内存，执行的结果可能不同于任何一种“多个线程交
+替执行”的结果（即，不是sequentially consistent的），参见下面的“反例”。Java 1.0-1.4对于内存访问的
+规范定义得很模糊，于是Java 5引入了基于happens-before关系的memory model，来精确地规定读写操
+作允许看到什么值。有兴趣的读者可以阅读William Pugh整理的Java Memory Model相关资料。
+【反例】
+下面的程序中，两个线程之间没有任何同步，故publisher线程里的写操作newFoo.nr = 42 与
+consumer线程里的myFoo.nr 读操作没有happens-before关系，是data race。因此，由于CPU的乱序
+执行，以及编译器的变换，consumer即使看到了sharedFoo 变量已赋值，看到了Foo 对象已经创建，
+也不保证看到成员变量Foo.nr 已被赋值为42。例子中，consumer的语句(4)中读myFoo.nr 的值，既
+有可能读到publisher写入的值42，也有可能读到初值0。
+class Foo {
+public int nr; // (0) 赋初值0
+}
+private Foo sharedFoo; // 非volatile共享变量
+public void publisher() {
+Foo newFoo = new Foo();
+newFoo.nr = 42; // (1) 非volatile写
+sharedFoo = newFoo; // (2) 非volatile写
+}
+public void consumer() {
+Foo myFoo;
+do {
+myFoo = sharedFoo; // (3) 非volatile读
+} while (myFoo == null); // 即便这里看到了对象已经创建，下面输出的myFoo.nr也可能不是42。
+System.out.println(myFoo.nr); // (4) 这是非volatile读。可能返回初值0或42
+}
+
+线程间共享数据，需要使用Java提供的同步机制，如锁、volatile变量、等待线程结束
+（ Thread.join ）等。注意：是否正确同步的标准是“是否建立了happens-before关系”，而不是使用
+了上述机制。
+建议按照以下顺序选取合适的同步机制：
+1. 首先考虑使用消息队列（如BlockingQueue ），或者其他Java标准库中提供的高级同步机制（如
+executor、future等），需特别留意Java API中对各个类的happens-before关系的描述。（见
+G.CON.10）
+2. 其次考虑使用锁来保护共享变量。如果情形比较简单，容易保证正确，或者需要用无锁同步提高性
+能，可以使用volatile变量同步。
+要注意，与C++的atomic<T> 不同，Java中volatile变量的+= 、-= 、*= 等复合赋值操作不
+是不可分割的原子读改写（atomic read-modify-write）操作，而是先读后写两个操作。
+如果需要原子读改写（atomic read-modify-write）操作，如原子自增（ getAndAdd ）、原
+子的compareAndExchange 等，考虑使用java.util.concurrent.atomic 中的原子类（如
+AtomicInteger ），但不要使用带acquire、release、opaque、plain后缀的方法。
+3. 如果尝试了前两条，性能仍然不理想，考虑采用更完善的无锁同步算法。如果性能仍然是问题，考
+虑采用java.util.concurrent.atomic.AtomicXxxx 中的弱顺序（weak order）的原子内存访
+问（acquire、release、opaque、plain）。（慎用，本文不涉及）
+（以上建议参考了Hans Boehm的演讲Using weakly ordered C++ atomics correctly）
+【正例】
+使用volatile变量同步。在下例中，volatile变量的写操作(2)和读操作(3)之间建立了happens-before关
+系，保证读操作(4)必然看到写操作(1)写入的42，而不是初值0。
+除了volatile变量以外，还可以使用锁同步或者使用Thread.join() 同步。它们都可以建立happensbefore
+关系。
+一般来说，如果使用锁，那么读和写都要加锁，而不是写线程需要加锁，而读的线程可以不加锁。
+【反例】
+下面的代码，只有写线程加了锁，读线程没有加锁，导致写操作(1)和读操作(6)之间没有happensbefore
+关系，造成data race，(6)有可能读到data 的初值0。在(5)前后加了synchronous块后，(4)的解
+锁操作happens before (4.5)的加锁操作，保证读操作(6)一定读到(1)写入的42，而不是初值0。
+private volatile Foo sharedFoo; // volatile共享变量
+public void publisher() {
+Foo newFoo = new Foo();
+newFoo.nr = 42; // (1) 写操作：写入42
+sharedFoo = newFoo; // (2) volatile写操作：写入新对象的引用
+}
+public void consumer() {
+Foo myFoo;
