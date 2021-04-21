@@ -1,0 +1,677 @@
+
+3.2.3 字符串
+G.TYP.07 不要在代码中硬编码用于表示换行、文件路径分隔的字符
+【级别】 要求
+【描述】
+用做换行（回车“\r”、换行“\n”）、文件路径分隔（“\”、“/”）的字符，在不同操作系统下是有区别的。
+如果需要换行，尽量用PrintStream 、PrintWriter 的println() 来代替在字符串中使用硬编码换行
+符，也可以使用System.lineSeparator() 获取运行时环境的换行符。文件路径分割符可以使用
+java.io.File 中的separator 和pathSeparator 静态属性。
+【反例】
+【正例】
+【例外】
+1. 正则表达式中允许硬编码“\r”、“\n”。
+2. Java.nio.file.Paths 能够自动区分系统使用的文件路径分隔符，使用Paths构造文件路径时允
+许硬编码路径分隔符。
+G.TYP.08 不要依赖平台默认的字符编码方式，使用UTF-8
+【级别】 要求
+【描述】
+中文Windows环境下的默认编码为GBK，英文linux环境下的默认编码为ISO-8859-1。依赖平台默认值
+意味着同样的程序在不同的平台上可能产生不同的结果。因此，Java源文件、资源文件、配置文件等必
+须用UTF-8编码。
+如果涉及与外界的数据交互（如：序列化、跨进程通讯），建议将数据转换为UTF-8编码。
+G.TYP.09 字符串大小写转换、数字格式化为西方数字时，必须加上
+Locale.ROOT 或Locale.ENGLISH
+【级别】 要求
+public class NanComparison {
+public static void main(String[] args) {
+double num = 0.0d;
+double result = Math.cos(1 / num); // 如果输入是infinity则Math.cos()返回 NaN
+if (Double.isNaN(result)) {
+System.out.println("result is NaN");
+}
+...
+}
+}
+System.out.print("Hello,world!\n");
+String filePath = path + "\\temp.txt";
+System.out.println("Hello,world!");
+String filePath = path + File.separator + "temp.txt";
+
+【描述】
+字符串大小写转换时要考虑地区语言上的差异。String 类的toUpperCase() 、toLowerCase() 方
+法、format() 方法，如果不指定输入参数，则会按当前系统默认的编码模式转换，可能会导致非预期
+的转换结果。
+字符对区域不敏感的，例如协议关键字、HTML的tags等优先用ROOT，字符对区域敏感或者强调英文
+习惯的应使用ENGLISH。
+如果确实需要在本地化GUI显示本地语言数字文字，也允许使用：
+Locale.getDefault(Locale.Category.DISPLAY)
+mystr.getBytes (StandardCharsets.UTF_8)
+【反例】
+如果当前环境是土耳其Turkish/阿拉伯语/孟加拉语/尼泊尔语/马拉帝语/阿萨姆语等，那toUpperCase
+输出的结果将不是预期的大写I，可能是另外一个字符（?）；format格式化后的数字也不是预期的西方
+数字2。
+【正例】
+字符串的大小写转换一般都是对26个英文字母，建议显式指定语言为Locale.ROOT 。
+【反例】
+【正例】（一次性转换）
+G.TYP.10 字符与字节的互相转换操作，要指明正确的编码方式
+【级别】 要求
+【描述】
+String testString = "i";
+System.out.println(testString.toUpperCase());
+String testString2 = String.format("%d", 2);
+System.out.println(testString2); // locale设置为ar-SA，2格式化后输出'?'
+String testString = "i";
+System.out.println(testString.toUpperCase(Locale.ROOT));
+String testString2 = String.format(Locale.ROOT, "%d", 2);
+System.out.println(testString2);
+// 对德语中的sharp s (?)会转换失败
+public static char[] toArray(String string) {
+char[] chars = string.toCharArray();
+for (int i = 0; i < chars.length; i++) {
+chars[i] = Character.toUpperCase(chars[i]);
+}
+return chars;
+}
+// 正确, 大小写转换一次完成所有操作
+public static char[] toArrayRemote(String string, Locale locale) {
+String upper = string.toUpperCase(locale);
+return upper.toCharArray();
+}
+
+Java虚拟机采用编码方式默认与操作系统的字符编码方式相同，String的编码方式、
+String.getBytes() 默认采用Java虚拟机编码。当跨平台实现字符与字节之间的转换，可能会导致乱
+码。所以字符与字节之间转换时要明确指定编码方式。指定编码可以使用java.nio.charset包中的类编
+码解码字符集，更简便的写法可用String的getBytes(Charset) 和带Charset参数的构造方法，它们已
+经通过StringCoding 类对编码方式进行了封装。
+本地化的自然语言文本（非ASCII）的比较、排序、查找，用java.text.Collator。
+【反例】
+上面的示例代码中，当跨平台实现字符到字节、字节到字符的转换，由于不同的平台采用的编码方式不
+同，可能会导致data与result的值不同。
+【正例】
+上面的示例代码中，即使跨平台实现字符到字节、字节到字符的转换，但是由于已经明确指定编码方式
+采用UTF-8编码，可保证data的值与result相同。
+【反例】
+上面的示例代码中，当文件的编码方式与Java虚拟机默认的编码方式不同时，会导致文件内容读取错
+误。
+【正例】
+String data = "123ABC中国";
+byte[] buf = data.getBytes();
+// 跨平台传输buf
+...
+String result = new String(buf);
+String data = "123ABC中国";
+byte[] buf = data.getBytes(StandardCharsets.UTF_8);
+// 跨平台传输buf
+...
+String result = new String(buf, StandardCharsets.UTF_8);
+String line;
+try (FileReader fr = new FileReader(fileName);
+BufferedReader br = new BufferedReader(fr)) {
+while (br.ready()) {
+line = br.readLine();
+...
+}
+...
+}
+
+上面的示例代码中，读取文件操作指定了与文件相同的编码方式，保证文件被正确读取。
+【例外】
+一些API没有提供字符集参数，例如
+org.springframework.web.multipart.MultipartFile.getBytes() 。
+G.TYP.11 内存中的敏感信息使用完毕后应立即清0
+【级别】 建议
+【描述】
+内存中的敏感信息使用结束后如果不及时清理，会存在敏感信息泄露的风险，应尽量减小敏感信息在内
+存中的生命周期，使用结束后立即清0。Java中的String 是不可变对象（创建后无法更改），使用
+String 保存口令、秘钥等敏感信息时，这些敏感信息会一直在内存中直至被垃圾收集器回收（其生命
+周期不可控），如果进程的内存被dump，会导致敏感信息泄露风险。
+内存中的敏感信息不能依赖垃圾回收机制的清理，而是在使用结束后主动将内存中的信息清0。为了方
+便内存的清理，推荐优先使用char[] / byte[] 存储敏感信息。对于必须使用String进行数据处理的场
+景（如web系统获取请求数据、数据需要转为json字符串进行传递、接口中预定义使用String传递参数
+等），不需要将String转为char[]这样的无效处理，但要对所有涉及敏感信息的String中的信息进行清
+理，不要遗漏，例如将一个含敏感信息的对象转为json串，使用结束后要将对象中敏感信息及json串全
+部清0。String的清理可以通过反射、调用JNI接口等方式实现。
+【反例】
+上面的代码中，使用String保存密码信息，可能会存在敏感信息泄露风险。
+【正例】
+String line;
+try (FileInputStream fis = new FileInputStream(fileName);
+InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
+BufferedReader br = new BufferedReader(isr)) {
+while (br.ready()) {
+line = br.readLine();
+// ...
+}
+}
+void doSomething() {
+String password = getPassword();
+verifyPassword(password);
+...
+}
+boolean verifyPassword(String pwd) {
+...
+}
+
+上面的代码中，使用char[] 来保存密码信息，密码使用结束后char数组被清0。
+【正例】（将三方件中的String清0）
+上面的代码中，从web容器中获取客户端提交的用户名和密码，进行登录验证，登录验证后主动将
+String中的密码信息清0。该示例以Java 8为例，高版本的Java中String的实现可能存在差别，此案例仅
+用做参考。
+3.2.4 类型使用与转换
+G.TYP.12 基本类型优于包装类型，注意合理使用包装类型
+【级别】 建议
+【描述】
+Java有两种类型，基本类型（Primitive type）和引用类型（Reference type）。基本类型如
+boolean 、int 、double ，引用类型如String 、List 。每一种基本类型都有其对应的包装类型
+（Wrapper classes），如对应int 的是Integer 。
+很多情况下基本类型优于包装类型：
+1. 在Java 5以及之后的版本中增加了自动装箱和拆箱的特性。但是，不恰当的同时使用基本类型和包
+装类型，可能带来大量隐含的装箱和拆箱的操作。如for 语句中，由于循环变量是基本类型，对
+其做sum累加时对性能有损耗。
+2. 整数型包装类型应该使用equals() 方法做相等比较，可以使用compareTo(another) 做大小比
+较。
+对于Integer var = ? 在-128至127范围内的赋值， Integer 对象是在IntegerCache.cache
+产生，会复用已有对象，这个区间内的Integer 值可以直接使用==进行判断，但是这个区间之外
+的所有数据，都会在堆上产生，不会复用已有对象。
+void doSomething() {
+char[] password = getPassword();
+verifyPassword(password);
+// 清除password
+Arrays.fill(password, (char) 0x00);
+}
+boolean verifyPassword(char[] pwd) {
+...
+}
+void doSomething() {
+...
+String user = request.getParameter("username");
+String password = request.getParameter("pwd");
+verifyLoginInfo(user, password);
+// 清除password
+try {
+Field valueFieldOfString = String.class.getDeclaredField("value");
+valueFieldOfString.setAccessible(true);
+char[] value = (char[]) valueFieldOfString.get(password);
+Arrays.fill(value, (char) 0x00);
+...
+}
+...
+}
+
+使用包装类型的合理场景有：
+作为集合中的元素、键和值；
+泛型，必须使用包装类型，如List<Integer> list ， OptionalInt rpcResult() ；
+反射方法调用需使用包装类型，例如在Method.invoke 、MethodHandle.invoke 中；
+POJO类的属性、RPC方法的返回值和参数等可能要序列化的且可能缺失值的场景中。
+G.TYP.13 明确地进行类型转换，避免依赖隐式类型转换
+【级别】 建议
+【描述】
+明确的类型转换表明程序员知道混合运算中所涉及的不同类型。
+避免意外地浮点数转换截取，否则会导致误差被逐步放大。
+在运算符的右边，要小心地使用更宽的操作数。尽量不要把复合赋值运算符应用于byte 、
+short 、char 类型的变量。
+【反例】
+【正例】
+【反例】
+【正例】
+做浮点运算前把整数转换为浮点数
+注：将整数转为浮点数也存在精度损失的问题，如int 、long 转为float ， long 转为
+double 。
+【反例】
+【正例】
+int big = 1999999999;
+float one = 1.0f;
+// 由于隐式类型转换导致精度损失
+System.out.println(big * one);
+int big = 1999999999;
+double one = 1.0d; // double而不是float
+System.out.println((double) big * one); // 更宽
+int nr = 2147483642; // 0x7ffffffa
+nr += 1.0f; // 运算后nr的结果是2147483647 (0x7fffffff)
+double nr = 2147483642; // 0x7ffffffa
+nr += 1.0; // 均为double, nr是2147483643.0 (0x7ffffffb.0)，与预期的一致
+short ns = 533;
+int ni = 6789;
+long nl = 4664382371590123456L;
+float f1 = ns / 7; // f1是76.0（截断）
+double d1 = ni / 30; // d1是226.0（截断）
+double d2 = nl * 2; // 由于整数溢出，d2是-9.1179793305293046E18
+double d3 = (double) nl * 2; // d3是9.328764743180247E18（截断）
+
+G.TYP.14 在引用类型向下转换前用instanceof 进行判断
+【级别】 建议
+【描述】
+没有判断类型直接进行类型转换，可能会因类型不匹配而导致运行期异常
+java.lang.ClassCastException 。参见G.ERR.10 尽量消除非受检的异常，不应该在整个类上使用
+SuppressWarning。
+简单的修改方法即是在强制转换之前使用instanceof 进行判断，确认转换操作可行，但可能带来的问
+题是修改点过多，工作量巨大，同时维护的工作量也会倍增。最好的方式还是改善设计，使集合中只有
+同一种类型的对象。
+【反例】
+【正例】
+使一个集合中只存储同一种类型的对象，根据不同的数据类型将上面示例中的方法拆分为2个。
+【例外】
+short ns = 533;
+int ni = 6789;
+long nl = 4664382371590123456L;
+float f1 = ns / 7.0f; // f1是76.14286
+double d1 = ni / 30.; // d1是226.3
+BigDecimal bd = new BigDecimal(nl);
+BigDecimal bd2 = bd.multiply(new BigDecimal(2)); // bd2是9328764743180246912
+List datas = new ArrayList();
+datas.add("Mike");
+datas.add("Jerry");
+datas.add(1);
+datas.add(3);
+for (Object data : datas) {
+System.out.println((String) data);
+}
+// 方法1：
+List<String> names = new ArrayList<>(DEFAULT_CAPACITY);
+names.add("Mike");
+names.add("Jerry");
+for (String name : names) {
+System.out.println(name);
+}
+// 方法2：
+List<Integer> prices = new ArrayList<>(DEFAULT_CAPACITY);
+prices.add(1);
+prices.add(3);
+for (Integer price : prices) {
+System.out.println(price);
+}
+
+类的设计可优先考虑泛型，但是有些API返回的就是Object 对象，调用方不得不强制转换为用户数据对
+象。例如Object.clone ， ObjectInputStream.readObject ，Android中的View.findViewById ，
+Context.getSystemService ， Message.obj 等。
+3.3 表达式
+G.EXP.01 不要在单个的表达式中对相同的变量赋值超过一次
+【级别】 要求
+【描述】
+对相同的变量进行多次赋值的表达式会产生混淆，并且容易产生非预期的行为。清晰的变量赋值会使代
+码更易懂，也更能保证程序按预期运行。
+【反例】
+上述代码中预期执行求和运算，而实际输出的结果为0。
+【正例】
+上述代码能保证正常执行求和运算。
+G.EXP.02 用括号明确表达式的操作顺序，避免过分依赖默认优先级
+【级别】 建议
+【描述】
+使用括号强调所使用的运算符顺序，防止因默认的优先级与设计思想不符而导致程序出错。
+然而过多的括号也会分散代码降低其可读性，下面是对如何使用括号的建议：
+一元运算符，不需要使用括号
+涉及位操作，推荐使用括号
+public class Increment {
+public static void main(String[] args) {
+int count = 0;
+for (int i = 0; i < 100; i++) {
+count = count++;
+}
+System.out.println(count);
+}
+}
+public class Increment {
+public static void main(String[] args) {
+int count = 0;
+for (int i = 0; i < 100; i++) {
+count++;
+}
+System.out.println(count);
+}
+}
+foo = ~a; // 一元运算符，不需要括号
+foo = -a; // 一元运算符，不需要括号
+if (var1 || !isSomeBool) // 一元运算符，不需要括号
+
+如果不涉及多种运算符，不需要括号
+对于极简的三元表达式或者条件表达式，不用加括号
+极简规定为：单个值（变量或常量)、方法调用的结果，直接或类型转换后的布尔比较。只要包含额外的
+（例如算术）运算，即先执行其他运算再拿其结果作布尔比较的，则不算极简，建议加括号。布尔比较
+（boolOp）是指== 、!= 、> 、>= 、< 、<= 等结果为boolean的表达式。
+【正例】
+G.EXP.03 在条件表达式?:的第2和第3个操作数使用相同的类型
+【级别】 建议
+【描述】
+条件运算符?:使用第1个操作数的布尔值决定后续表达式哪个被求值。但是Java语言有相当复杂的规则去
+判定表达式的结果类型，不一致的操作数类型，可能导致意料之外的类型转换。如第2和第3个操作数在
+类型对齐时，可能会因为自动拆箱导致NullPointerException。
+解决办法推荐G.TYP.13 明确地进行类型转换，不要依赖隐式类型转换。
+【反例】
+foo = (a & 0xFF) + b; // 涉及位运算符，需要括号
+foo = a + b + c; // 运算符相同，不需要括号
+foo = 1 << (2 + 3); // 运算符不同，需要括号
+foo = a + (b / 5); // 运算符不同，需要括号
+if (a && b && c) ... // 运算符相同，不需要额外括号
+if ((a && b) || c) ... // 运算符不同，建议使用括号
+if (var1 boolOp var2) // 直接布尔比较
+if (var1 boolOp (short) var2) // 类型转换后布尔比较
+if (func(var1) boolOp func(var2)) // 直接布尔比较
+if (var1 > min || var1 < max || func1(num) != 0) // 直接布尔比较
+if (var1 boolOp (var2 + var3)) // 有额外的算术运算
+if (var1 boolOp ((short) var2 - var3))) // 有额外的算术运算
+if (func(var1) boolOp (func(var2) + var3)) // 有额外的算术运算
+if (var1 > min || var1 < max || (func1(num) - base != 0)) // 有额外的算术运算
+return list == null || list.isEmpty(); // 直接布尔比较
+int result = func(n1 + n2, n3); // 逗号两边的表达式，不需要括号
+int result = n1 == n2 ? n1 : (n1 – n2); // 有额外的算术运算
+int result = maximumValue > minimumValue ? minimumValue : maximumValue; // 直接布尔比较
+int result = func1(param1) > func2(param2) ? minimumValue : maximumValue;
+if (func1(param1) > func2(param2) || func1(param1) < func3(params3)) { // 直接布尔比较
+result = func1(param1);
+}
+/*
+* 可以考虑使用Stream的方法：
+* allMatch和noneMatch - 注意流为空时返回true
+* anyMatch - 注意流为空时返回false
+*/
+Stream<Object> xs = Stream.of(foo, bar, baz);
+if (xs.anyMatch(Objects::isNull)) { ... }
+
+【正例】
+G.EXP.04 表达式的比较，应该遵循左侧倾向于变化、右侧倾向于不变的原则
+【级别】 建议
+【描述】
+当变量或方法调用与常量比较时，如果常量放左边，如if (MAX == v) 不符合阅读习惯，而if (MAX
+> v) 更是难于理解。
+应该按人的正常阅读、表达习惯，将常量放右边。由于现代IDE都有较为强大的NullPointerException
+检测能力，可以考虑显式地注解@NotNull ，另外G.MET.06 Java 8使用Optional 代替null作为返回值
+或者可能的缺失值；禁止对optional 对象赋值为null。
+1. 对于== ，变量放在左边，null或常量放在右边;
+2. 如果变量明显不会为null，例如new、单例、非空注解后，可用obj.equals("foo") ；如果必须
+使用null，或者这个变量有可能是null，应该使用Objects.equals(variable, "foo") 或者显式
+用if判断或"foo".equals(obj) ;
+3. 描述区间时，前半段表达式常量在左，也是允许的，如if (MIN < bar && bar < MAX) 。
+【反例】
+【正例】
+public class Expression {
+public static void main(String[] args) {
+char alpha = 'A';
+int foo = 0;
+// 其他代码。foo的值可能发生改变
+boolean trueExp = true; // 求值结果为true的表达式
+System.out.print(trueExp ? alpha : 0); // 打印 A
+System.out.print(trueExp ? alpha : foo); // 打印 65
+Integer value = null;
+System.out.print(trueExp ? value : foo); // 抛出NullPointerException
+}
+}
+public class Expression {
+public static void main(String[] args) {
+char alpha = 'A';
+int foo = 0;
+boolean trueExp = true; // 求值结果为true的表达式
+System.out.print(trueExp ? alpha : 0); // 打印 A
+// 主动将foo转为更窄的类型，可能会导致截断
+System.out.print(trueExp ? alpha : ((char) foo)); // 打印 A
+Integer value = null;
+System.out.print(trueExp ? value : Integer.valueOf(foo)); // 打印 null
+}
+}
+if (MAX == foo) { ... }
+var1.equals("test");
+if (null != obj) { ... }
+
+G.EXP.05 禁止直接使用可能为null的对象，防止出现空指针引用
+【级别】 要求
+【描述】
+访问一个为null的对象时，会导致空引用问题，代码中抛出NullPointerException 。该类问题应该通
+过预检查的方式进行消解，而不是通过try...catch 机制处理NullPointerException 。
+【反例】
+上面的代码中， System.getenv() 返回值可能为null，代码中在使用变量env 前未判空，会发生空指
+针引用。
+【正例】
+上面的代码中，对System.getenv() 返回值先判空再使用，消除了空指针引用问题。
+G.EXP.06 代码中不应使用断言（assert）
+【级别】 建议
+【描述】
+默认情况下，断言（assert）是被禁用的，可以通过-ea或-da选项开启或关闭。断言（assert）的判断
+条件为false时会抛出AssertionError ，表示程序遇到了一个不可恢复的错误，对该错误不做处理会导
+致程序异常退出。断言（assert）只适用于开发调试阶段的问题定位。以下两种场景不应使用断言：
+1 运行态错误检查
+如下常见的运行态错误检查，不应使用断言（assert），否则可能因为运行态错误触发
+AssertionError 导致程序异常终止或因为断言（assert）禁用而导致错误未处理。
+无效的用户输入（如环境变量、命令行参数等）
+IO错误（如文件操作、网络通信等）
+权限不足（如文件权限、用户权限等）
+Java虚拟机运行时错误（如堆栈溢出等）
+系统资源耗尽（如文件句柄数不足等）
+可以考虑使用如下方式替代断言（assert）：
+Objects.requireNonNull和checkIndex系列
+Guava Preconditions的checkXxx系列
+Objects.equals(var1, var2);
+Objects.equals(var1, HW_CONST);
+"test".equals(var1);
+if (obj != null) { ... }
+String env = System.getenv(SOME_ENV);
+if (env.length() > MAX_LENGTH) {
+...
+}
+String env = System.getenv(SOME_ENV);
+if (env != null && env.length() > MAX_LENGTH) {
+...
+}
+
+【反例】
+上述代码使用断言（assert）检查resourceName 对应的资源不存在的情况，当资源不存在时会导致程
+序异常终止。
+【正例】
+上述代码使用if语句处理获取的指定资源的InputStream。
+2 逻辑代码执行
+在断言（assert）中执行业务逻辑代码，会导致程序因为断言（assert）的启用/禁用产生不同的逻辑。
+【反例】
+上述代码中直接在断言（assert）中执行list 的remove 操作。禁用断言（assert）时， list 的
+remove 操作会被忽略。
+【例外】
+单元测试代码中可以使用断言（assert），但更推荐使用测试框架提供的断言方法。
+3.4 控制语句
+G.CTL.01 不要在控制性条件表达式中执行赋值操作或执行复杂的条件判断
+【级别】 要求
+【描述】
+复杂的条件判断是指在一个条件表达式中boolean运算符数量超过3（Checkstyle工具
+BooleanExpressionComplexity）。
+在控制性条件表达式中执行赋值或执行复杂的条件判断，常常导致意料之外的行为，且代码的可读性非
+常差。
+控制性条件表达式的具体形式如下：
+if (controlling expression)
+while (controlling expression)
+do ... while (controlling expression)
+for (second operand)
+switch (controlling expression)
+InputStream inputStream = this.getClass().getClassLoader()
+.getResourceAsStream(resourceName);
+assert inputStream != null;
+// 对inputStream执行其他操作
+InputStream inputStream = this.getClass().getClassLoader()
+.getResourceAsStream(resourceName);
+if (inputStream != null) {
+// 对inputStream执行其他操作
+}
+public void doSomething(List list, Object element) {
+assert list.remove(element) : " Failed to remove the element: " + element;
+...
+}
+
+?: (first operand)
+&& (either operand)
+|| (either operand)
+【反例】
+【正例】
+【例外】
+在非控制性的表达式中，且在子表达式中赋值，是允许的：
+G.CTL.02 含else if分支的条件判断应在最后加一个else分支
+【级别】 建议
+if (isFoo = false) { ... } // 在控制性判断中赋值不易理解
+if (isFoo == false) { ... } // 冗余不简洁，容易出错
+if (false == isFoo) { ... } // 冗余不简洁，容易出错
+public void fun(boolean isFoo, boolean isBar) {
+if (isFoo = isBar) {
+...
+}
+}
+public void fun(boolean isBar, boolean isFlag) {
+boolean isFoo;
+while ((isFoo = isBar) && isFlag) {
+...
+}
+}
+boolean isFoo = someBoolean; // 在上面赋值
+if (isFoo) { ... } // 直接使用
+public void fun(boolean isBar) {
+boolean isFoo = isBar; // 在上面赋值
+if (isFoo) { // 直接使用
+...
+}
+}
+public void fun(boolean isBar, boolean isFlag) {
+boolean isFoo = isBar; // 在上面赋值
+while (isFoo && isFlag) { // 直接使用
+...
+}
+}
+public void assignNocontrol(BufferedReader reader) throws IOException {
+String line;
+while ((line = reader.readLine()) != null) {
+// 对line执行其他操作
+...
+}
+}
+
+【描述】
+含多个else if条件组合的判断逻辑，往往会出现被遗漏的分支，在最后设置一个else分支可对遗漏场景
+进行处理（类似于switch-case语句要有default分支）。
+最后的else分支如果没有明确的处理场景，可以记录一条日志或抛出异常等，如： log("unkown
+condition") 、throw new IllegalStateException("non-exhaustive cases") 等。
+【反例】
+【正例】
+如果在条件分支中只是对同一个布尔变量根据各个条件值来赋值，可以将条件语句简化为一个直接对此
+布尔变量赋值的语句。如：
+上面的代码示例可以直接优化为boolean isResolved = foo(); 。
+G.CTL.03 switch语句要有default分支
+【级别】 要求
+【描述】
+每个switch语句都应该包含一个default分支，即使default分支没有业务逻辑代码。dafault分支中没有
+业务逻辑代码时，可以记录一条日志或抛出异常等，如： log("unkown condition") 、throw new
+IllegalStateException("non-exhaustive cases") 等。
+【例外】
+对于枚举类型的switch语句，已经明确涵盖所有可能的场景，可以省略default分支。IDE或其他静态分
+析工具也能在switch语句缺少枚举场景时，发出警告。
+G.CTL.04 禁止使用空的无限循环
+【级别】 要求
+if ((employee.flags & HOURLEY_FLAG) && (employee.age > RETIRED_AGE)) {
+...
+} else if ((employee.flags & HOURLEY_FLAG) && (employee.age < RETIRED_AGE)) {
+...
+} else if ((employee.flags & HOURLEY_FLAG) && (employee.age == RETIRED_AGE)) {
+...
+}
+if ((employee.flags & HOURLEY_FLAG) && (employee.age > RETIRED_AGE)) {
+...
+} else if ((employee.flags & HOURLEY_FLAG) && (employee.age < RETIRED_AGE)) {
+...
+} else if ((employee.flags & HOURLEY_FLAG) && (employee.age == RETIRED_AGE)) {
+...
+} else {
+...
+}
+boolean isResolved;
+if(foo()) {
+isResolved = true;
+} else { // 也可能没有else分支
+isResolved = false;
+}
+
+【描述】
+编写一个空的循环体，不会完成具体功能，反倒可能会消耗CPU；另一方面，如果刻意编写空循环来消
+耗CPU，却又可能被编译器或者JIT优化而消除。总之，空的循环体要么没有意义，要么不能确保符合开
+发者的预期。因此，禁止使用空的无限循环。
+【反例】
+以下编写了一个alwaysRun() 方法试图模拟一个空闲任务，然而它并非一定能满足开发者的预期，因
+为编译器或者JIT可能会因为优化而删除这个循环。
+【正例】
+对于上述代码，可以采用sleep() / yield() 。
+备注：本规则是针对“空的”且“无限”的循环。对于如下代码，只要doTravel() 返回结果可以为false，
+此循环就不是“无限”的，那么这种写法仍是合法的。
+3.5 方法
+3.5.1 方法设计
+方法设计的精髓：方法是可组合、可重用的代码最小单位，编写高内聚低耦合的整洁方法，同时把代码
+有效组织起来。代码简单直接、不隐藏设计者的意图、用干净利落的抽象和直截了当的控制语句将方法
+有序组织起来。
+契约式设计、防御式编程有利于编写安全可靠的代码。可以用在要求满足前置/后置条件的场景，例如
+null判断。
+不要使用运行时类型擦除后相同的重载方法。
+为了减少大量参数的显式判空，提高性能或可读性，需要明确告知由调用者保证null safety，代码中可
+以采用如下注解或者注释。如果明确使用了下列注解，那么可以直接写nonNullParam.something ；
+否则，一个public或protected方法如果没有显式地对参数判空，就认为存在null safety风险。
+javax.annotation.ParametersAreNonnullByDefault
+android.support.annotation.NonNull
+public void alwaysRun() {
+while (true) {
+// 什么也不做
+}
+}
+public final int INTERVAL = 10000; // 单位：毫秒
+public void alwaysRun() {
+while (true) {
+// 写法一：用sleep即可
+Thread.sleep(INTERVAL); // 注意throws InterruptedException异常处理，本示例略
+// 写法二：用yield亦可
+Thread.yield();
+}
+}
+while (doTravel(xxx)) {
+}
+
+androidx.annotation.NonNull
+org.jetbrains.annotaions.NotNull
+lombok.NonNull
+@apiNote 警示了如果参数为空则抛出异常，并且存在@throws NullPointerException
+方法要设计合适的返回值来指示对象的当前状态或执行结果；这类具有返回值的方法执行后要对返回值
+做检查，并对不同的返回值作出相应的处理。
+对于Native方法，可对其进行封装，封装的方法中进行安全管理器检查、参数校验、返回值校验、可变
+值的防御性复制等安全操作。
+使用JDK自带的API或广泛使用的开源库，不要重新写类似的功能。
+Java 8中，考虑使用Instant代替Date，LocalDateTime代替Calendar，DateTimeFormatter代替
+SimpleDateFormat。
+G.MET.01 方法要简短
+【级别】 建议
+【描述】
+复杂过长的方法往往意味着方法抽象层次不足或功能不够单一。建议方法要进行合理抽象分层，对功能
+不够单一的方法使用合理的手段进行重构，以提升代码的可读性、可维护性。
+可以考虑从以下维度间接约束方法的尺寸和复杂度：
+方法行数建议不超过50行（非空非注释）；
+方法的参数，建议不超过5个；
+方法最大代码块嵌套深度，建议不要超过4层。
+方法参数
+方法的参数过多，会使得该方法易于受外部（其他部分的代码）变化的影响，从而影响维护工作，同时
+也会增大测试的工作量。方法的参数个数如果超过5个，可以考虑如下优化方式：
+对方法进行抽象或重构；
+将相关参数合在一起，定义成类，用对象封装；
+当构造方法含有多个参数时，尝试建造者（Builder）或工厂模式，JDK源码中有很多示例可供参
+考，例如Calendar.Builder，HttpClient.Builder。
+代码块嵌套深度
+方法的代码块嵌套深度指的是方法中的代码控制块（例如：if、for、while、switch等）之间互相包含
+的深度。方法本身算一层，try-catch不算一层嵌套。方法内的lambda表达式、局部类和匿名类嵌套层
+次以最内层方法来计算，不累计enclosing method的嵌套层次。使用卫语句可以有效的减少if相关的嵌
+套层次。
+【正例】
+原代码嵌套层数是 3：
+int foo(Item msg) {
+if (isReceived) {
+type = getMsgType(msg);
+if (type != UNKNOWN) {
+return dealMsg(...);
+}
+}
+return -1;
+}
+
+重构技法：使用卫语句重构，嵌套层数变成 2。
+还可以考虑使用Stream来减少嵌套和圈复杂度。例如JDK Stream docs上1行代码的简洁例子，如果用
+传统写法很冗长：
+G.MET.02 不要使用已标注为@Deprecated的方法
+【级别】 要求
+【描述】
+标注为@Deprecated的方法，是由于各种原因被废弃的方法，为了保持兼容性而没有删除，新写的代码
+应避免使用这些方法，而应该使用推荐的代替方法。
