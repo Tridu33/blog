@@ -32,9 +32,9 @@ public class Base64Convert {
      * @param args args
      */
     public static void main(String[] args) {
-        String jsonPath = "D:\\文档\\test\\华为考试通过截图.rar.json";
-        outToFile(jsonPath);
-
+        String fileName = "项目表设计.xlsx";
+        String targetFileName = "项目表设计.xlsx";
+        toCodeFile(accuqreFileJsonParam(fileName, fileName));
     }
 
     private static void outToFile(String jsonPath) {
@@ -54,18 +54,18 @@ public class Base64Convert {
         }
     }
 
-    private static FileJsonParam test(String fileName, String targetFileName) {
+    private static FileJsonParam accuqreFileJsonParam(String fileName, String targetFileName) {
         FileJsonParam fileJsonParam = new FileJsonParam();
         fileJsonParam.filePath = "D:\\文档\\test\\";
         fileJsonParam.targetFilePath = "D:\\文档\\test\\";
-        fileJsonParam.fileName = "0000255585-王蒿-wWX1043508-华为考试通过截图.rar";
-        fileJsonParam.targetFileName = "华为考试通过截图.rar";
+        fileJsonParam.fileName = fileName;
+        fileJsonParam.targetFileName = targetFileName;
         // fileJsonParam.jsonPath = "D:\\文档\\test\\华为考试通过截图.rar.json";
         return fileJsonParam;
 
     }
 
-    private static void toSplitFile(FileJsonParam fileJsonParam) {
+    private static void toCodeFile(FileJsonParam fileJsonParam) {
         try {
             Base64Convert baseCov = new Base64Convert();
             baseCov.fileJsonParam = fileJsonParam;
