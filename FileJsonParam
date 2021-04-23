@@ -1,0 +1,49 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
+ */
+
+package com.huawei.test;
+
+import com.alibaba.fastjson.annotation.JSONField;
+
+import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author wWX1043508
+ * @date 2021/4/23 15:56
+ */
+@Data
+class FileJsonParam {
+    @JSONField(ordinal = 1)
+    public String fileName;
+
+    @JSONField(ordinal = 6)
+    public String targetFileName;
+
+    @JSONField(ordinal = 7)
+    public String targetFilePath;
+
+    @JSONField(ordinal = 8)
+    public String targetFullPath;
+
+    @JSONField(ordinal = 9)
+    public String jsonPath;
+
+    @JSONField(ordinal = 2)
+    public String filePath;
+
+    @JSONField(ordinal = 3)
+    public String fullPath;
+
+    @JSONField(ordinal = 4)
+    public int fileSize;
+
+    @JSONField(ordinal = 5)
+    public int splitSize = 85 * 1024;
+
+    @JSONField(ordinal = 20)
+    public List<String> targetFileList = new ArrayList<>();
+}
