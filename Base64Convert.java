@@ -4,6 +4,9 @@
 
 package com.huawei.casemanage.test;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
@@ -20,18 +23,77 @@ import java.io.InputStream;
 
 /**
  * @author wWX1043508
- * @date 2021/4/21 16:59
+ * @since 2021/04/23
  */
 public class Base64Convert {
+    public FileJsonParam fileJsonParam = new FileJsonParam();
+
+    /**
+     * @param args args
+     */
     public static void main(String[] args) {
+        String jsonPath = "D:\\文档\\test\\华为考试通过截图.rar.json";
+        outToFile(jsonPath);
+
+    }
+
+    private static void outToFile(String jsonPath) {
+        Base64Convert baseCov = new Base64Convert();
+        String jsonStr = baseCov.readFromFile(jsonPath);
+        baseCov.fileJsonParam = JSON.parseObject(jsonStr, FileJsonParam.class);
+        String targetFullPath = baseCov.fileJsonParam.targetFilePath;
+        StringBuilder text = new StringBuilder();
+        baseCov.fileJsonParam.targetFileList.forEach(filename -> {
+            baseCov.readFromFile(baseCov.fileJsonParam.targetFilePath + filename, text);
+        });
+        try {
+            baseCov.base64ToIo(text.toString(),
+                baseCov.fileJsonParam.targetFilePath + "json" + baseCov.fileJsonParam.targetFileName);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static FileJsonParam test(String fileName, String targetFileName) {
+        FileJsonParam fileJsonParam = new FileJsonParam();
+        fileJsonParam.filePath = "D:\\文档\\test\\";
+        fileJsonParam.targetFilePath = "D:\\文档\\test\\";
+        fileJsonParam.fileName = "0000255585-王蒿-wWX1043508-华为考试通过截图.rar";
+        fileJsonParam.targetFileName = "华为考试通过截图.rar";
+        // fileJsonParam.jsonPath = "D:\\文档\\test\\华为考试通过截图.rar.json";
+        return fileJsonParam;
+
+    }
+
+    private static void toSplitFile(FileJsonParam fileJsonParam) {
         try {
             Base64Convert baseCov = new Base64Convert();
-            String strBase64 = baseCov.ioToBase64("D:\\文档\\test\\tezxt.png"); //将 io 转换为 base64编码
-            System.out.println(">>> " + strBase64);
-            baseCov.writeToFile(strBase64, "D:\\文档\\test\\tezxt.txt");
-            strBase64 = baseCov.readFromFile("D:\\文档\\test\\tezxt.txt");
-            System.out.println("2>>> " + strBase64);
-            // baseCov.base64ToIo(strBase64, "D:\\文档\\test\\tezxt1.png"); //将 base64编码转换为 io 文件流，生成一幅新图片
+            baseCov.fileJsonParam = fileJsonParam;
+            baseCov.fileJsonParam.fullPath = baseCov.fileJsonParam.filePath + baseCov.fileJsonParam.fileName;
+            baseCov.fileJsonParam.targetFullPath = baseCov.fileJsonParam.targetFilePath
+                + baseCov.fileJsonParam.targetFileName;
+            baseCov.fileJsonParam.jsonPath = baseCov.fileJsonParam.targetFullPath + ".json";
+            String strBase64 = baseCov.ioToBase64(baseCov.fileJsonParam.fullPath); //将 io 转换为 base64编码
+            baseCov.fileJsonParam.fileSize = strBase64.length();
+            int filenameCount = 0;
+            int lastSize = 0;
+            while (true) {
+                filenameCount++;
+                int nextsize = lastSize + baseCov.fileJsonParam.splitSize;
+                if (nextsize > strBase64.length()) {
+                    nextsize = strBase64.length();
+                }
+                baseCov.fileJsonParam.targetFileList.add(baseCov.fileJsonParam.targetFileName + filenameCount + ".txt");
+                baseCov.writeToFile(strBase64.substring(lastSize, nextsize),
+                    baseCov.fileJsonParam.targetFullPath + filenameCount + ".txt");
+                lastSize = nextsize;
+                if (nextsize >= strBase64.length()) {
+                    baseCov.writeToFile(JSON.toJSONString(baseCov.fileJsonParam, SerializerFeature.PrettyFormat,
+                        SerializerFeature.WriteMapNullValue, SerializerFeature.WriteDateUseDateFormat),
+                        baseCov.fileJsonParam.targetFullPath + ".json");
+                    break;
+                }
+            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -39,10 +101,12 @@ public class Base64Convert {
         }
     }
 
-    BASE64Decoder decoder = new BASE64Decoder();
-
+    /**
+     * @param fileName fileName
+     * @return String
+     * @throws IOException IOException
+     */
     public String ioToBase64(String fileName) throws IOException {
-        // String fileName = "d:/gril.gif"; //源文件
         String strBase64 = null;
         try {
             InputStream in = new FileInputStream(fileName);
@@ -60,15 +124,20 @@ public class Base64Convert {
         return strBase64;
     }
 
+    // 将 base64编码转换为 io 文件流，生成一幅新图片
+
+    /**
+     * @param strBase64 strBase64
+     * @param fileName fileName
+     * @throws IOException IOException
+     */
     public void base64ToIo(String strBase64, String fileName) throws IOException {
         String string = strBase64;
-        // String fileName = "d:/gril2.gif"; //生成的新文件
-        try {
+        byte[] bytes = new BASE64Decoder().decodeBuffer(string);
+        byte[] buffer = new byte[1024];
+        try (ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+            FileOutputStream out = new FileOutputStream(fileName)) {
             // 解码，然后将字节转换为文件
-            byte[] bytes = new BASE64Decoder().decodeBuffer(string);   //将字符串转换为byte数组
-            ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-            byte[] buffer = new byte[1024];
-            FileOutputStream out = new FileOutputStream(fileName);
             int bytesum = 0;
             int byteread = 0;
             while ((byteread = in.read(buffer)) != -1) {
@@ -80,29 +149,56 @@ public class Base64Convert {
         }
     }
 
-    //判断文件是否存在
+    /**
+     * @param fileName fileName
+     * @return boolean
+     */
     public static boolean isExist(String fileName) {
         File file = new File(fileName);
         return file.exists();
     }
 
+    /**
+     * @param path path
+     * @return String
+     */
     public String readFromFile(String path) {
         StringBuilder text = new StringBuilder();
-        try {
-            BufferedReader in = new BufferedReader(new FileReader(path));
+        try (BufferedReader in = new BufferedReader(new FileReader(path))) {
             String str;
             while ((str = in.readLine()) != null) {
-                // System.out.println(str);
                 text.append(str);
+                text.append(System.lineSeparator());
             }
-            // System.out.println(str);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return text.toString();
     }
 
+    /**
+     * @param path path
+     * @return String
+     */
+    public StringBuilder readFromFile(String path, StringBuilder text) {
+        try (BufferedReader in = new BufferedReader(new FileReader(path))) {
+            String str;
+            while ((str = in.readLine()) != null) {
+                text.append(str);
+                text.append(System.lineSeparator());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return text;
+    }
+
     //将string写入文件中
+
+    /**
+     * @param str str
+     * @param path path
+     */
     public void writeToFile(String str, String path) {
         // 新建文件夹
         File file = new File(path);
