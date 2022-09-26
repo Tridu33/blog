@@ -6,7 +6,6 @@ package com.huawei.test;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
-import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +14,6 @@ import java.util.List;
  * @author wWX1043508
  * @date 2021/4/23 15:56
  */
-@Data
 class FileJsonParam {
     @JSONField(ordinal = 1)
     public String fileName;
